@@ -7,6 +7,6 @@ build docker container: `docker build build -t whatever`
 
 run docker container: `docker run --rm -it -v $(pwd):/root/env whatever /bin/bash`
 
-inside docker container run `make <whatever>`
+inside docker container run `make build-x86_64`
 outside container run `./run.sh`
 
