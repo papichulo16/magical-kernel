@@ -1,4 +1,4 @@
-# Magical Kernel Ultra
+# Magical Kernel 
 ## The most magical kernel of all
 
 ### building
