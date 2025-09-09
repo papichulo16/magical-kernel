@@ -171,9 +171,14 @@ section .rodata
 gdt64:
   dq 0 ; zero entry
 .code_segment: equ $ - gdt64
+  ; this is the kernel code segment descriptor
   ; executable flag, descriptor type flag
   ; present flag, 64bit flag
   dq (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53) 
+
+    ; 0x10: kernel data segment descriptor
+    ; type=data (0x2), S=1, P=1, no 64-bit flag
+    dq (1 << 44) | (1 << 47)
 .pointer:
   ; size
   dw $ - gdt64 - 1
