@@ -1,7 +1,10 @@
+#include "includes/print.h"
+#include "includes/int.h"
+
 void kernel_main() {
-  // write ok
-  // *((int*) 0xb8000) = 0x2f4b2f4f;
   idt_init();
 
-  *((int*) 0xb8000) = 0x2f412f41;
+  print_clear();
+  print_str("Welcome to Magical Kernel Ultra!\n");
+  print_str("This is a work in progress, I am pretty busy and lazy so this will be shit and slow paced... but hopefully I get something done!\n");
 }
