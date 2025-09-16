@@ -1,6 +1,14 @@
 # Magical Kernel 
 ## The most magical kernel of all
 
+### features
+
+right now the working features are as follows:
+ - 64 bit mode booting
+ - interrupt handling
+ - printing
+ - keyboard input
+
 ### goal
 
 the goal is to have working IO, separate kernel/user space, and a file system.......

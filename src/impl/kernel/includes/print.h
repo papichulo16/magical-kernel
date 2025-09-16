@@ -23,6 +23,15 @@ enum {
 };
 
 void print_clear();
+
 void print_char(char character);
 void print_str(char* string);
+
+void print_nibble(uint8_t byte);
+void print_byte(uint8_t byte);
+void print_word(uint16_t word);
+void print_dword(uint32_t dword);
+void print_qword(uint64_t qword);
+
 void print_set_color(uint8_t foreground, uint8_t background);
+void print_menu();

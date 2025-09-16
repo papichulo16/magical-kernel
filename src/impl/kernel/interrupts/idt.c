@@ -1,4 +1,5 @@
-#include "includes/int.h"
+#include "idt.h"
+#include "pic.h"
 
 __attribute__((aligned(0x10))) 
 static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for performance
@@ -27,16 +28,22 @@ void idt_init() {
     idtr.base = (uintptr_t)&idt[0];
     idtr.limit = (uint16_t)sizeof(idt_entry_t) * IDT_MAX_DESCRIPTORS - 1;
 
-    // fill the IDT
+    // fill the IDT for the exception handlers
     for (uint8_t vector = 0; vector < 32; vector++) {
         idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
         vectors[vector] = true;
     }
+    
+    idt_set_descriptor(0x20, &timer_int, 0x8E);
+    idt_set_descriptor(0x21, &keyboard_int, 0x8E);
+    
 
     // set the IDTR
     __asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
 
     // enable interrupts
     __asm__ volatile ("sti"); // set the interrupt flag
+    
+    pit_init(100); // init timer
 }
 

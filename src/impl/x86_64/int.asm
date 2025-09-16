@@ -1,5 +1,10 @@
 global isr_stub_table
+global keyboard_int
+global timer_int
+
 extern exception_handler
+extern timer_int_handler
+extern keyboard_int_handler
 
 section .text
 bits 64
@@ -16,6 +21,16 @@ isr_stub_%+%1:
     call exception_handler
     iretq
 %endmacro
+
+; timer interrupt
+timer_int:
+    call timer_int_handler
+    iretq
+
+; keyboard interrupt
+keyboard_int:
+    call keyboard_int_handler
+    iretq
 
 ; exception table
 isr_no_err_stub 0
