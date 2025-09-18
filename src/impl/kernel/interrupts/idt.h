@@ -8,15 +8,14 @@
 
 // ==================================
 
-__attribute__((noreturn)) void exception_handler(void);
-void idt_init(void);
-void test_handler(void);
+__attribute__((noreturn)) void mk_exception_handler(void);
+void mk_idt_init(void);
 
 static bool vectors[IDT_MAX_DESCRIPTORS];
 
-extern void* isr_stub_table[];
-extern void* keyboard_int;
-extern void* timer_int;
+extern void* mk_isr_stub_table[];
+extern void* mk_asm_keyboard_int;
+extern void* mk_asm_timer_int;
 
 // ==================================
 

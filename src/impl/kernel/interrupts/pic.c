@@ -1,7 +1,7 @@
 #include "pic.h"
 #include "../includes/inlines.c"
 
-void IRQ_set_mask(uint8_t IRQline) {
+void mk_irq_set_mask(uint8_t IRQline) {
     uint16_t port;
     uint8_t value;
 
@@ -15,7 +15,7 @@ void IRQ_set_mask(uint8_t IRQline) {
     outb(port, value);        
 }
 
-void IRQ_clear_mask(uint8_t IRQline) {
+void mk_irq_clear_mask(uint8_t IRQline) {
     uint16_t port;
     uint8_t value;
 
@@ -29,7 +29,7 @@ void IRQ_clear_mask(uint8_t IRQline) {
     outb(port, value);        
 }
 
-void PIC_sendEOI(uint8_t irq)
+void mk_pic_send_eoi(uint8_t irq)
 {
 	if(irq >= 8)
 		outb(PIC2_COMMAND,PIC_EOI);
@@ -43,7 +43,7 @@ arguments:
 		vectors on the master become offset1..offset1+7
 	offset2 - same for slave PIC: offset2..offset2+7
 */
-void PIC_remap(int offset1, int offset2)
+void mk_pic_remap(int offset1, int offset2)
 {
 	outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
 	io_wait();
@@ -69,7 +69,7 @@ void PIC_remap(int offset1, int offset2)
 }
 
 // init the timer
-void pit_init(uint32_t frequency) {
+void mk_pit_init(uint32_t frequency) {
     uint32_t divisor = 1193180 / frequency;
 
     outb(0x43, 0x36);           // Command port: channel 0, lobyte/hibyte, mode 3, binary
@@ -77,10 +77,11 @@ void pit_init(uint32_t frequency) {
     outb(0x40, divisor >> 8);   // High byte
 }
 
-void pic_init() {
-    PIC_remap(0x20,0x28);
+void mk_pic_init() {
+    mk_pic_remap(0x20,0x28);
     
-    IRQ_clear_mask(1); // enable keyboard interrupts
+    // mk_irq_clear_mask(0); // enable timer interrupts
+    mk_irq_clear_mask(1); // enable keyboard interrupts
 
     __asm__ volatile ("sti"); // set the interrupt flag
 }

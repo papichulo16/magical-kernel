@@ -28,11 +28,11 @@
 
 #define CASCADE_IRQ 2
 
-void IRQ_clear_mask(uint8_t IRQline);
-void IRQ_set_mask(uint8_t IRQline);
-void PIC_sendEOI(uint8_t irq);
+void mk_irq_clear_mask(uint8_t IRQline);
+void mk_irq_set_mask(uint8_t IRQline);
+void mk_pic_send_eoi(uint8_t irq);
 
-void PIC_remap(int offset1, int offset2);
+void mk_pic_remap(int offset1, int offset2);
 
-void pic_init(void);
-void pit_init(uint32_t frequency);
+void mk_pic_init(void);
+void mk_pit_init(uint32_t frequency);

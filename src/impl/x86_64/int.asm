@@ -1,10 +1,10 @@
-global isr_stub_table
-global keyboard_int
-global timer_int
+global mk_isr_stub_table
+global mk_asm_keyboard_int
+global mk_asm_timer_int
 
-extern exception_handler
-extern timer_int_handler
-extern keyboard_int_handler
+extern mk_exception_handler
+extern mk_timer_int_handler
+extern mk_keyboard_int_handler
 
 section .text
 bits 64
@@ -12,24 +12,24 @@ bits 64
 ; macros for exception handlers
 %macro isr_err_stub 1
 isr_stub_%+%1:
-    call exception_handler
+    call mk_exception_handler
     iretq
 %endmacro
 
 %macro isr_no_err_stub 1
 isr_stub_%+%1:
-    call exception_handler
+    call mk_exception_handler
     iretq
 %endmacro
 
 ; timer interrupt
-timer_int:
-    call timer_int_handler
+mk_asm_timer_int:
+    call mk_timer_int_handler
     iretq
 
 ; keyboard interrupt
-keyboard_int:
-    call keyboard_int_handler
+mk_asm_keyboard_int:
+    call mk_keyboard_int_handler
     iretq
 
 ; exception table
@@ -68,7 +68,7 @@ isr_no_err_stub 31
 
 ; create the isr stub table
 section .rodata
-isr_stub_table:
+mk_isr_stub_table:
   %assign i 0 
   %rep    32 
       dq isr_stub_%+i

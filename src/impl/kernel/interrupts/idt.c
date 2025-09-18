@@ -6,12 +6,12 @@ static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for perf
 
 static idtr_t idtr;
 
-void exception_handler() {
+void mk_exception_handler() {
     __asm__ volatile ("cli; hlt"); // Completely hangs the computer
 }
 
 // this is to set up an idt entry
-void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
+void mk_idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
     idt_entry_t* descriptor = &idt[vector];
 
     descriptor->isr_low        = (uint64_t)isr & 0xFFFF;
@@ -23,19 +23,19 @@ void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
     descriptor->reserved       = 0;
 }
 
-void idt_init() {
+void mk_idt_init() {
     // set up the interrupt descriptor table register info
     idtr.base = (uintptr_t)&idt[0];
     idtr.limit = (uint16_t)sizeof(idt_entry_t) * IDT_MAX_DESCRIPTORS - 1;
 
     // fill the IDT for the exception handlers
     for (uint8_t vector = 0; vector < 32; vector++) {
-        idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
+        mk_idt_set_descriptor(vector, mk_isr_stub_table[vector], 0x8E);
         vectors[vector] = true;
     }
     
-    idt_set_descriptor(0x20, &timer_int, 0x8E);
-    idt_set_descriptor(0x21, &keyboard_int, 0x8E);
+    mk_idt_set_descriptor(0x20, &mk_asm_timer_int, 0x8E);
+    mk_idt_set_descriptor(0x21, &mk_asm_keyboard_int, 0x8E);
     
 
     // set the IDTR
@@ -44,6 +44,6 @@ void idt_init() {
     // enable interrupts
     __asm__ volatile ("sti"); // set the interrupt flag
     
-    pit_init(100); // init timer
+    mk_pit_init(100); // init timer
 }
 
