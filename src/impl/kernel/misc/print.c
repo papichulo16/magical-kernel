@@ -1,4 +1,4 @@
-#include "../includes/print.h"
+#include "print.h"
 #include <stdint.h>
 
 const static size_t NUM_COLS = 80;

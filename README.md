@@ -23,7 +23,7 @@ run docker container: `docker run --rm -it -v $(pwd):/root/env whatever /bin/bas
 inside docker container run `make build-x86_64`
 outside container run `./run.sh`
 
-### References
+### Resources
 
  - https://wiki.osdev.org/Interrupts
  - https://wiki.osdev.org/Interrupt_Descriptor_Table

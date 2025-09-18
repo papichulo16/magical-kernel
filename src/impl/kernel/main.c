@@ -1,8 +1,8 @@
-#include "includes/print.h"
-#include "includes/inlines.c"
+#include "print.h"
+#include "inlines.c"
 
-#include "interrupts/idt.h"
-#include "interrupts/pic.h"
+#include "idt.h"
+#include "pic.h"
 
 void mk_initial_checks() {
   print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_RED);
