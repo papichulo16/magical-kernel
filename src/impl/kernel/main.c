@@ -11,7 +11,7 @@ void initial_checks() {
     print_str("[!] ERR: Interrupts are not enabled\n");
   
   if ((inb(0x21) & 2) == 1)
-    print_str("[!] ERR: Keyboard not initialized\n");
+    print_str("[!] ERR: Keyboard IRQ is masked\n");
 
   print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_BLACK);
 }

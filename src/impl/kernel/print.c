@@ -56,7 +56,15 @@ void print_newline() {
 }
 
 void print_handle_backspace() {
-    col--;
+    if (col > 0) {
+        col--;
+    } else {
+        if (row <= NUM_MENU_ROWS)
+            return;
+
+        row--;
+        col = NUM_COLS;
+    }
 
     buffer[col + NUM_COLS * row] = (struct Char) {
         character: (uint8_t) ' ',
@@ -149,5 +157,7 @@ void print_menu() {
     
     for (int i = 0; i < NUM_COLS; i++)
         print_char('-');
+    
+    print_char('\n');
 }
 

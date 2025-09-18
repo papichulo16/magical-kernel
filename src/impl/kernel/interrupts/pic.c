@@ -63,9 +63,9 @@ void PIC_remap(int offset1, int offset2)
 	outb(PIC2_DATA, ICW4_8086);
 	io_wait();
 
-	// Unmask both PICs.
-	outb(PIC1_DATA, 0);
-	outb(PIC2_DATA, 0);
+	// mask both PICs.
+	outb(PIC1_DATA, 0xff);
+	outb(PIC2_DATA, 0xff);
 }
 
 // init the timer
@@ -80,7 +80,7 @@ void pit_init(uint32_t frequency) {
 void pic_init() {
     PIC_remap(0x20,0x28);
     
-    IRQ_set_mask(0);
+    IRQ_clear_mask(1); // enable keyboard interrupts
 
     __asm__ volatile ("sti"); // set the interrupt flag
 }
