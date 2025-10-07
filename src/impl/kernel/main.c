@@ -29,6 +29,6 @@ void kernel_main() {
   mk_initial_checks();
 
   print_menu();
-  
+
   while(1);
 }
