@@ -59,7 +59,7 @@ void print_handle_backspace() {
     if (col > 0) {
         col--;
     } else {
-        if (row <= NUM_MENU_ROWS)
+        if (row <= NUM_MENU_ROWS+1)
             return;
 
         row--;
@@ -105,6 +105,15 @@ void print_str(char* str) {
 
         print_char(character);
     }
+}
+
+void print_error(char* str) {
+    uint8_t c = color;
+
+    print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_RED);
+    print_str(str);
+    
+    color = c;
 }
 
 void print_nibble(uint8_t byte) {

@@ -8,7 +8,6 @@
 
 // ==================================
 
-__attribute__((noreturn)) void mk_exception_handler(void);
 void mk_idt_init(void);
 
 static bool vectors[IDT_MAX_DESCRIPTORS];

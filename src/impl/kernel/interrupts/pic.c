@@ -1,5 +1,5 @@
 #include "pic.h"
-#include "../includes/inlines.c"
+#include "inlines.c"
 
 void mk_irq_set_mask(uint8_t IRQline) {
     uint16_t port;

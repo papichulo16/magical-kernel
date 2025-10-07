@@ -6,10 +6,6 @@ static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for perf
 
 static idtr_t idtr;
 
-void mk_exception_handler() {
-    __asm__ volatile ("cli; hlt"); // Completely hangs the computer
-}
-
 // this is to set up an idt entry
 void mk_idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
     idt_entry_t* descriptor = &idt[vector];

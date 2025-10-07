@@ -1,10 +1,15 @@
-#include "../includes/print.h"
-#include "../includes/inlines.c"
+#include "print.h"
+#include "inlines.c"
 
 #include "pic.h"
 #include "isr.h"
 
 bool shift = false;
+
+void mk_exception_handler() {
+    __asm__ volatile ("cli; hlt"); // Completely hangs the computer
+}
+
 
 void mk_timer_int_handler() {
     print_str(".");
