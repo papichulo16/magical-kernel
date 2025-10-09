@@ -1,3 +1,4 @@
+#include "context.h"
 #include "print.h"
 #include "inlines.c"
 
@@ -10,11 +11,14 @@ void mk_exception_handler() {
     __asm__ volatile ("cli; hlt"); // Completely hangs the computer
 }
 
+struct regs_context tmp;
 
 void mk_timer_int_handler() {
-    print_str(".");
+    mk_thread_ctx_save(&tmp);
     
     mk_pic_send_eoi(0);
+    
+    mk_thread_ctx_restore(&tmp);
 }
 
 void mk_keyboard_int_handler() {
