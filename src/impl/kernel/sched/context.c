@@ -89,6 +89,8 @@ void mk_thread_ctx_restore(struct regs_context* ctx) {
         "mov rbx, [rdi + 0x68]\n\t"
 
         "mov rsp, [rdi + 0x90]\n\t"
+        "mov rax, [rdi + 0x90]\n\t"
+        "push rax\n\t"
         "mov rax, [rdi + 0x88]\n\t"
         "push rax\n\t"
         "mov rax, [rdi + 0x80]\n\t"

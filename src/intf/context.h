@@ -9,6 +9,4 @@ struct regs_context {
 };
 
 void mk_thread_ctx_save(struct regs_context* ctx);
-void mk_thread_ctx_restore(struct regs_context* ctx);
-
-void mk_context_switch();
+__attribute__((noreturn)) void mk_thread_ctx_restore(struct regs_context* ctx);

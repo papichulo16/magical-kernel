@@ -1,6 +1,7 @@
 #include "page_temp.h"
 #include "isr.h"
 #include "print.h"
+#include <stdint.h>
 
 // this file is just for a temporary page allocator so I
 // can work on the scheduler
@@ -27,7 +28,7 @@ uint8_t* mk_temp_page_alloc() {
 
     if (freelist_head->is_free == 0) {
         print_error("[!] Corruption in freelist\n");
-        mk_exception_handler();
+        halt();
     }
     
     p = freelist_head;
@@ -54,12 +55,12 @@ void mk_temp_page_free(uint8_t* p) {
         ptr > (union mk_temp_page *) (&pages + (NUM_PAGES * PAGE_SIZE))) {
         
         print_error("[!] Invalid free ptr\n");
-        mk_exception_handler();
+        halt();
     }
     
-    if ((ptr - (union mk_temp_page *) &pages) % PAGE_SIZE != 0) {
+    if (((ptr - (union mk_temp_page *) &pages) & ~1) % PAGE_SIZE != 0) {
         print_error("[!] Misaligned page ptr\n");
-        mk_exception_handler();
+        halt();
     }
     
     ptr->freed.is_free = 1;
