@@ -8,5 +8,6 @@ struct regs_context {
     uint64_t rip, cs, rflags, rsp, ss;
 };
 
-void mk_thread_ctx_save(struct regs_context* ctx);
-__attribute__((noreturn)) void mk_thread_ctx_restore(struct regs_context* ctx);
+void mk_thread_ctx_save_from_stack(struct regs_context* ctx, uint64_t* stack);
+
+void mk_thread_ctx_restore_from_stack(struct regs_context* ctx, uint64_t* stack);

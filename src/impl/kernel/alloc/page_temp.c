@@ -58,7 +58,7 @@ void mk_temp_page_free(uint8_t* p) {
         halt();
     }
     
-    if (((ptr - (union mk_temp_page *) &pages) & ~1) % PAGE_SIZE != 0) {
+    if (((ptr - (union mk_temp_page *) &pages) & ~3) % PAGE_SIZE != 0) {
         print_error("[!] Misaligned page ptr\n");
         halt();
     }
@@ -70,5 +70,5 @@ void mk_temp_page_free(uint8_t* p) {
 }
 
 void mk_temp_stack_free(uint8_t* p) {
-    mk_temp_page_free(p - PAGE_SIZE);
+    mk_temp_page_free((uint8_t *) ((uint64_t) (p - PAGE_SIZE) & ~1));
 }

@@ -41,13 +41,9 @@ mk_asm_timer_int:
     push rbx
     push rax
     
-    ; rsp value before interrupt
-    lea rax, [rsp + 0x90]
-    push rax
-    
+    mov rdi, rsp
     call mk_timer_int_handler
     
-    pop rax
     pop rax
     pop rbx
     pop rcx

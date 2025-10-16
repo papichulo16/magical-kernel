@@ -178,7 +178,7 @@ gdt64:
 
     ; 0x10: kernel data segment descriptor
     ; type=data (0x2), S=1, P=1, no 64-bit flag
-    dq (1 << 44) | (1 << 47)
+    dq (1 << 41) | (1 << 44) | (1 << 47)
 .pointer:
   ; size
   dw $ - gdt64 - 1

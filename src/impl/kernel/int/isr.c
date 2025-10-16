@@ -5,6 +5,7 @@
 #include "inlines.c"
 
 #include "pic.h"
+#include <stdint.h>
 #include "isr.h"
 
 bool shift = false;
@@ -100,7 +101,8 @@ void halt() {
 
 void mk_exception_handler(isr_xframe_t* frame) {
     print_error("\nFATAL ");
-    print_error(__exception_labels[frame->base_frame.vector - 3]);
+    print_byte(frame->base_frame.vector);
+    print_error(__exception_labels[frame->base_frame.vector]);
     print_error(":\r\n");
 
     __dump_registers(frame);
@@ -111,18 +113,10 @@ void mk_exception_handler(isr_xframe_t* frame) {
 struct regs_context tmp;
 struct mk_thread_obj* mk_working_thread;
 
-void mk_timer_int_handler() {
+void mk_timer_int_handler(uint64_t* stack) {
     
     mk_working_thread = mk_get_working_thread();
     
-    if (mk_working_thread->state != MK_THREAD_WORKING && 
-        mk_working_thread->state != MK_THREAD_READY) {
-        
-        mk_pic_send_eoi(0);
-
-        return;
-    }
-
     if (mk_working_thread->time_slice > 0) {
         
         mk_working_thread->time_slice -= 1;
@@ -137,25 +131,18 @@ void mk_timer_int_handler() {
         mk_pic_send_eoi(0);
         mk_working_thread->started = 1;
 
-        mk_thread_ctx_restore(&mk_working_thread->regs);
+        mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
     }
     
-    
-    mk_thread_ctx_save(&mk_working_thread->regs);
+    mk_thread_ctx_save_from_stack(&mk_working_thread->regs, stack);
 
     mk_pic_send_eoi(0);
 
-    // mk_working_thread = mk_get_working_thread();
-    // mk_thread_ctx_restore(&mk_working_thread->regs);
-    
     if (!mk_thread_ctx_switch()) {
         mk_working_thread = mk_get_working_thread();
 
-        mk_thread_ctx_restore(&mk_working_thread->regs);
+        mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
     }
-    /*
-    */
-
 }
 
 void mk_keyboard_int_handler() {
@@ -176,7 +163,6 @@ void mk_keyboard_int_handler() {
             shift = true;
             mk_pic_send_eoi(1);
 
-  mk_irq_clear_mask(0); // enable timer interrupts
             return;
         }
 

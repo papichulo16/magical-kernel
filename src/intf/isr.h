@@ -49,6 +49,6 @@ __attribute__((noreturn)) void mk_exception_handler(isr_xframe_t* frame);
 void halt();
 
 void mk_keyboard_int_handler(void);
-void mk_timer_int_handler(void);
+void mk_timer_int_handler(uint64_t* stack);
 
 char translate_scancode_set_1(uint8_t sc, bool shift);

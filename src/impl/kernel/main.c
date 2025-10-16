@@ -1,4 +1,5 @@
 #include "context.h"
+#include "isr.h"
 #include "page_temp.h"
 #include "print.h"
 #include "inlines.c"
@@ -39,7 +40,7 @@ void test() {
 }
 
 void test2() {
-  print_str("Hello from a final thread\n");
+  print_str("Hello from another thread\n");
   
   mk_thread_kill();
 }
@@ -49,8 +50,9 @@ void idle() {
 }
 
 void debugging() {
-  print_qword((uint64_t) &mk_thread_ctx_restore);
-  print_qword((uint64_t) &test);
+  // print_qword((uint64_t) &mk_thread_ctx_restore);
+  // print_qword((uint64_t) &test);
+  print_qword((uint64_t) &mk_asm_timer_int);
 }
 
 void kernel_main() {
@@ -61,11 +63,12 @@ void kernel_main() {
   
   mk_thread_create(&idle);
   mk_thread_create(&test);
+  mk_thread_create(&test2);
   // mk_thread_create(&test2);
   
   // debugging();
   
-  // mk_start_timer();
+  mk_start_timer();
 
   while(1);
 }
