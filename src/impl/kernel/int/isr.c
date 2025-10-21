@@ -118,7 +118,6 @@ void mk_timer_int_handler(uint64_t* stack) {
     mk_working_thread = mk_get_working_thread();
     
     if (mk_working_thread->time_slice > 0) {
-        
         mk_working_thread->time_slice -= 1;
 
         mk_pic_send_eoi(0);
@@ -127,11 +126,12 @@ void mk_timer_int_handler(uint64_t* stack) {
     }
         
     if (!mk_working_thread->started) {
-
         mk_pic_send_eoi(0);
         mk_working_thread->started = 1;
 
         mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
+
+        return;
     }
     
     mk_thread_ctx_save_from_stack(&mk_working_thread->regs, stack);

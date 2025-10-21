@@ -33,20 +33,15 @@ void mk_start_timer() {
     print_error("[!] ERR: Timer IRQ is masked\n");
 }
 
+int a = 0;
+
 void test() {
-  print_str("Hello from a thread\n");
+  a += 1;
+  
+  print_dword((uint32_t) a);
+  print_char('\n');
   
   mk_thread_kill();
-}
-
-void test2() {
-  print_str("Hello from another thread\n");
-  
-  mk_thread_kill();
-}
-
-void idle() {
-  while(1);
 }
 
 void debugging() {
@@ -61,10 +56,8 @@ void kernel_main() {
 
   print_menu();
   
-  mk_thread_create(&idle);
   mk_thread_create(&test);
-  mk_thread_create(&test2);
-  // mk_thread_create(&test2);
+  mk_thread_create(&test);
   
   // debugging();
   

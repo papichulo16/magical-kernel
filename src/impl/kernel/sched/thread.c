@@ -2,6 +2,7 @@
 #include "page_temp.h"
 #include "print.h"
 #include <stdint.h>
+#include "inlines.c"
 
 // this setup is temporary, once I have a kmalloc() implementation
 // I will make this better
@@ -10,7 +11,7 @@ uint8_t thread_pos = 0;
 
 void mk_thread_create(void* entry) {
     int t_idx = -1;
-
+    
     for (int i = 0; i < MAX_THREADS; i++) {
         if (threads[i].state == MK_THREAD_KILLED) {
             t_idx = i;
@@ -40,13 +41,22 @@ void mk_thread_create(void* entry) {
     
 }
 
+void mk_thread_idle() {
+    while(1);
+}
+
 void mk_thread_kill() {
+    disable_interrupts();
+    
     threads[thread_pos].state = MK_THREAD_KILLED;
     threads[thread_pos].time_slice = 0;
+    threads[thread_pos].regs.rip = (uint64_t) &mk_thread_idle;
     
     mk_temp_page_free(threads[thread_pos].stack_base);
     
-    while(1);
+    enable_interrupts();
+    
+    mk_thread_idle();
 }
 
 int mk_thread_ctx_switch() {
@@ -59,8 +69,6 @@ int mk_thread_ctx_switch() {
             thread_pos = i;
             threads[thread_pos].state = MK_THREAD_WORKING;
             threads[thread_pos].time_slice = 10;
-            
-            // print_dword((uint32_t) i & 0xff);
             
             return 0;
         }

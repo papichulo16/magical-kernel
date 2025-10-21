@@ -6,8 +6,8 @@
 right now the working features are as follows:
  - 64 bit mode booting
  - interrupt handling
- - printing
- - keyboard input
+ - multithreading in kernel space
+ - Input/Output
 
 ### goal
 

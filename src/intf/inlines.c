@@ -1,6 +1,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+static inline void enable_interrupts(void) {
+    __asm__ volatile ("sti" ::: "memory");
+}
+
+static inline void disable_interrupts(void) {
+    __asm__ volatile ("cli" ::: "memory");
+}
+
 static inline bool are_interrupts_enabled()
 {
     unsigned long flags;
