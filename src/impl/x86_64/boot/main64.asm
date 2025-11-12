@@ -17,7 +17,12 @@ long_mode_start:
   ; the "video memory" starts at address 0xb8000
   ; mov dword [0xb8000], 0x2f4b2f4f
 
+  mov rsp, virt_stack_top
+
   call kernel_main
 
   hlt
 
+virt_stack_bottom:
+  resb 0x4000
+virt_stack_top:

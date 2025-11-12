@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #define NUM_PAGES 0x100
-#define PAGE_SIZE 0x2000
+#define PAGE_SIZE 0x1000
 
 void mk_temp_page_init();
 

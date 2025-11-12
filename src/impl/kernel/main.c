@@ -1,5 +1,3 @@
-#include "context.h"
-#include "isr.h"
 #include "page_temp.h"
 #include "print.h"
 #include "inlines.c"
@@ -33,21 +31,21 @@ void mk_start_timer() {
     print_error("[!] ERR: Timer IRQ is masked\n");
 }
 
-int a = 0;
+void idle_thread() {
+  while(1);
+}
 
-void test() {
-  a += 1;
-  
-  print_dword((uint32_t) a);
-  print_char('\n');
-  
+void alice() {
+  print_str("alice\n");
   mk_thread_kill();
 }
 
 void debugging() {
-  // print_qword((uint64_t) &mk_thread_ctx_restore);
-  // print_qword((uint64_t) &test);
-  print_qword((uint64_t) &mk_asm_timer_int);
+  uint32_t* addr = (uint32_t *) 0x1fffff0 + 0x010000000000;
+  *(uint32_t *) addr = (uint32_t) 0x41414141;
+  uint32_t test = *(uint32_t *) addr;
+  
+  print_dword(test);
 }
 
 void kernel_main() {
@@ -56,10 +54,10 @@ void kernel_main() {
 
   print_menu();
   
-  mk_thread_create(&test);
-  mk_thread_create(&test);
-  
+  mk_thread_create(&idle_thread);
+  mk_thread_create(&alice);
   // debugging();
+  
   
   mk_start_timer();
 

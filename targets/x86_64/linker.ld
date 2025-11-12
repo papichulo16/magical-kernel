@@ -1,17 +1,43 @@
+KERNEL_VMA = 0xffffffff81000000;
+KERNEL_PMA = 0x1000000;
+
 ENTRY(start)
 
 SECTIONS
 {
-  /* the operating system starts one megabyte in */
-  . = 0x1000000;
+  /* -------------------------------
+   Boot section — low memory, identity-mapped
+   ------------------------------- */
 
-  .boot :
+  . = KERNEL_PMA;
+  
+  .boot : AT(ADDR(.boot))
   {
     KEEP(*(.multiboot_header))
+    *(.boot.text)
+    *(.boot.data)
+    *(.boot.rodata)
   }
 
-  .text :
+  .boot.bss : AT(ADDR(.boot.bss))
   {
-    *(.text)
+    *(.boot.bss)
   }
+
+  /* Align to next page after boot section */
+  . = ALIGN(4096);
+  _boot_end = .;
+
+  /* -------------------------------
+     Kernel proper — high virtual memory
+     ------------------------------- */
+  . = KERNEL_VMA + _boot_end - KERNEL_PMA;
+  KERNEL_VIRT_START = .;
+
+  .text : AT(_boot_end)
+  {
+    *(.text*)
+  }
+
+  KERNEL_VIRT_END = .;
 }

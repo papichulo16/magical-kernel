@@ -28,7 +28,7 @@ uint8_t* mk_temp_page_alloc() {
 
     if (freelist_head->is_free == 0) {
         print_error("[!] Corruption in freelist\n");
-        halt();
+        // halt();
     }
     
     p = freelist_head;
@@ -55,12 +55,12 @@ void mk_temp_page_free(uint8_t* p) {
         ptr > (union mk_temp_page *) (&pages + (NUM_PAGES * PAGE_SIZE))) {
         
         print_error("[!] Invalid free ptr\n");
-        halt();
+        // halt();
     }
     
     if (((ptr - (union mk_temp_page *) &pages) & ~3) % PAGE_SIZE != 0) {
         print_error("[!] Misaligned page ptr\n");
-        halt();
+        // halt();
     }
     
     ptr->freed.is_free = 1;

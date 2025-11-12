@@ -1,7 +1,7 @@
 global start
 extern long_mode_start
 
-section .text
+section .boot.text
 
 bits 32 ; 32 bit mode!!
 
@@ -23,7 +23,7 @@ start:
 
   ; load the global descriptor table
   lgdt [gdt64.pointer]
-  jmp gdt64.code_segment:long_mode_start
+  jmp gdt64.code_segment:long_mode_start_trampoline
 
   hlt
 
@@ -89,18 +89,24 @@ no_long_mode:
   jmp error
 
 setup_page_tables:
-  ; this will just set up the first index of the page tables 
-  ; to point to the next page table, as well as set flags
   mov eax, page_table_l3
   or eax, 0b11 ; present, writeable flags
   mov [page_table_l4], eax
 
+  ; just playign aroung with the MMU, hopefully i remmeber to delete
+  mov eax, page_table_l3
+  or eax, 0b11 ; present, writeable flags
+  mov [page_table_l4 + 511 * 8], eax
+
   mov eax, page_table_l2
   or eax, 0b11 ; present, writeable flags
-  mov [page_table_l3], eax
+  mov [page_table_l3 + 0 * 8], eax
 
-  ; this will be to set every index of the l2 table
-  ; to point somewhere 2MB apart
+  mov eax, page_table_l2
+  or eax, 0b11 ; present, writeable flags
+  mov [page_table_l3 + 510 * 8], eax
+
+  ; map out 32MB for the kernel from paddr 0x0-0x1ffffff
 
   mov ecx, 0
 
@@ -112,7 +118,7 @@ setup_page_tables:
   mov [page_table_l2 + ecx * 8], eax
 
   inc ecx
-  cmp ecx, 512
+  cmp ecx, 16
   jne .fill_loop
   
   ret
@@ -148,8 +154,13 @@ error:
 
   hlt
     
+bits 64
+long_mode_start_trampoline:
+  ; now in 64bit mode, jump to high virtual address
+  mov rax, long_mode_start
+  jmp rax
 
-section .bss
+section .boot.bss
 align 0x1000
 
 ; page tables setup
@@ -159,13 +170,15 @@ page_table_l3:
   resb 0x1000
 page_table_l2:
   resb 0x1000
+page_table_l1:
+  resb 0x1000
 
 ; reserve memory space for the stack
 stack_bottom:
   resb 0x4000
 stack_top:
 
-section .rodata
+section .boot.rodata
 
 ; global descriptor table is required for 64bit mode
 gdt64:
@@ -176,9 +189,9 @@ gdt64:
   ; present flag, 64bit flag
   dq (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53) 
 
-    ; 0x10: kernel data segment descriptor
-    ; type=data (0x2), S=1, P=1, no 64-bit flag
-    dq (1 << 41) | (1 << 44) | (1 << 47)
+  ; 0x10: kernel data segment descriptor
+  ; type=data (0x2), S=1, P=1, no 64-bit flag
+  dq (1 << 41) | (1 << 44) | (1 << 47)
 .pointer:
   ; size
   dw $ - gdt64 - 1
