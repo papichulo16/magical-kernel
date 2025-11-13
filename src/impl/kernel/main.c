@@ -1,7 +1,8 @@
-#include "page_temp.h"
 #include "print.h"
 #include "inlines.c"
 
+#include "page.h"
+#include "virt.h"
 #include "idt.h"
 #include "pic.h"
 #include "thread.h"
@@ -19,7 +20,8 @@ void mk_initial_checks() {
 void mk_sys_init() {
   mk_pic_init();
   mk_idt_init();
-  mk_temp_page_init();
+  mk_page_alloc_init();
+  mk_virt_init();
 
   print_clear();
 }
@@ -37,6 +39,7 @@ void idle_thread() {
 
 void alice() {
   print_str("alice\n");
+
   mk_thread_kill();
 }
 
@@ -54,12 +57,12 @@ void kernel_main() {
 
   print_menu();
   
-  mk_thread_create(&idle_thread);
-  mk_thread_create(&alice);
+  // mk_thread_create(&idle_thread);
+  // mk_thread_create(&alice);
   // debugging();
   
   
-  mk_start_timer();
+  // mk_start_timer();
 
   while(1);
 }

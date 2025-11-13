@@ -1,4 +1,4 @@
-KERNEL_VMA = 0xffffffff81000000;
+KERNEL_VMA = 0xffffffff80000000;
 KERNEL_PMA = 0x1000000;
 
 ENTRY(start)
@@ -31,7 +31,7 @@ SECTIONS
   /* -------------------------------
      Kernel proper — high virtual memory
      ------------------------------- */
-  . = KERNEL_VMA + _boot_end - KERNEL_PMA;
+  . = KERNEL_VMA + _boot_end;
   KERNEL_VIRT_START = .;
 
   .text : AT(_boot_end)

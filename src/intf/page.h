@@ -2,16 +2,14 @@
 #include <stdint.h>
 
 #define PAGE_SIZE 0x1000
-
-extern uint8_t KERNEL_PHYS_START[];
-extern uint8_t KERNEL_PHYS_END[];
+#define NUM_PAGES 0x8000 * 8
 
 typedef struct {
     uint8_t* bitmap;       
     uint64_t total;  
 } mk_page_alloc_t;
 
-void mk_allocator_init();
+void mk_page_alloc_init();
 
-uint8_t* mk_page_alloc();
-uint8_t* mk_page_free(uint8_t* p);
+uint8_t* mk_phys_page_alloc();
+void mk_phys_page_free(uint8_t* p);
