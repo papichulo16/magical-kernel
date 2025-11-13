@@ -4,10 +4,10 @@
 ### features
 
 right now the working features are as follows:
- - 64 bit mode booting
  - interrupt handling
  - multithreading in kernel space
- - Input/Output
+ - input/output
+ - virtual memory
 
 ### goal
 
