@@ -3,6 +3,7 @@
 #include "print.h"
 #include <stdint.h>
 #include "inlines.c"
+#include "virt.h"
 
 // this setup is temporary, once I have a kmalloc() implementation
 // I will make this better
@@ -29,11 +30,8 @@ void mk_thread_create(void* entry) {
     threads[t_idx].state = MK_THREAD_READY;
     threads[t_idx].started = 0;
     threads[t_idx].entry = entry;
-    threads[t_idx].stack_base = mk_phys_page_alloc();
+    threads[t_idx].stack_base = mk_vmmap_l1(0);
     
-    print_qword((uint64_t) threads[t_idx].stack_base);
-    print_char('\n');
-
     threads[t_idx].regs.rsp = (uint64_t) threads[t_idx].stack_base + PAGE_SIZE;
     threads[t_idx].regs.rip = (uint64_t) threads[t_idx].entry;
 
@@ -55,7 +53,7 @@ void mk_thread_kill() {
     threads[thread_pos].time_slice = 0;
     threads[thread_pos].regs.rip = (uint64_t) &mk_thread_idle;
     
-    mk_phys_page_free(threads[thread_pos].stack_base);
+    mk_unmmap_l1(threads[thread_pos].stack_base);
     
     enable_interrupts();
     

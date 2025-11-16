@@ -106,7 +106,6 @@ setup_page_tables:
   or eax, 0b11 ; present, writeable flags
   mov [page_table_l3 + 510 * 8], eax
 
-  ; map out 32MB for the kernel from paddr 0x0-0x1ffffff
 
   mov ecx, 0
 
@@ -118,7 +117,11 @@ setup_page_tables:
   mov [page_table_l2 + ecx * 8], eax
 
   inc ecx
-  cmp ecx, 16
+  ; map out 32MB for the kernel from paddr 0x0-0x1ffffff
+  ; cmp ecx, 16
+
+  ; map out more cuz who cares
+  cmp ecx, 512
   jne .fill_loop
   
   ret

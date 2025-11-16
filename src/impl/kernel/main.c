@@ -57,12 +57,12 @@ void kernel_main() {
 
   print_menu();
   
-  // mk_thread_create(&idle_thread);
-  // mk_thread_create(&alice);
+  mk_thread_create(&idle_thread);
+  mk_thread_create(&alice);
   // debugging();
   
   
-  // mk_start_timer();
+  mk_start_timer();
 
   while(1);
 }
