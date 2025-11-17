@@ -1,12 +1,13 @@
 #include "context.h"
 #include "thread.h"
-
 #include "print.h"
 #include "inlines.c"
-
 #include "pic.h"
-#include <stdint.h>
 #include "isr.h"
+#include "mklib.h"
+#include "cmd.h"
+
+#include <stdint.h>
 
 bool shift = false;
 
@@ -44,6 +45,9 @@ char* __exception_labels[] = {
     "[0x1E] Security Exception",
     "[0x1F] Inexplicable Error"
 };
+
+char cmd_buf[256];
+uint8_t cmd_pos = 0;
 
 void __dump_registers(isr_xframe_t* frame) {
     char itoa_buffer[67];
@@ -165,12 +169,30 @@ void mk_keyboard_int_handler() {
 
             return;
         }
-
-        char c = translate_scancode_set_1(scancode, shift);
-        print_char(c);
         
-        if (c == '\n')
+        char c = translate_scancode_set_1(scancode, shift);
+        
+        if (c == '\n') {
+            print_char(c);
+
+            mk_handle_cmd((char *) &cmd_buf);
+            memset(&cmd_buf, 0, sizeof(cmd_buf));
+            cmd_pos = 0;
+
             print_str("$ ");
+            mk_pic_send_eoi(1);
+
+            return;
+        }
+
+        if (cmd_pos == 255) {
+            mk_pic_send_eoi(1);
+
+            return;
+        }
+
+        cmd_buf[cmd_pos++] = c;
+        print_char(c);
     }
 
     mk_pic_send_eoi(1);

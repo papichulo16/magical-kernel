@@ -1,8 +1,8 @@
+#include "cmd.h"
 #include "print.h"
 #include "inlines.c"
 
 #include "page.h"
-#include "slab.h"
 #include "virt.h"
 #include "idt.h"
 #include "pic.h"
@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-void mk_initial_checks() {
+void initial_checks() {
   if (!are_interrupts_enabled())
     print_error("[!] ERR: Interrupts are not enabled\n");
   
@@ -18,48 +18,31 @@ void mk_initial_checks() {
     print_error("[!] ERR: Keyboard IRQ is masked\n");
 }
 
-void mk_sys_init() {
-  mk_pic_init();
-  mk_idt_init();
+void sys_init() {
   mk_page_alloc_init();
   mk_virt_init();
-
-  print_clear();
+  mk_idt_init();
+  mk_pic_init();
 }
 
-void mk_start_timer() {
+void start_timer() {
   mk_irq_clear_mask(0); // enable timer interrupts
   
   if ((inb(0x21) & 1) == 1)
     print_error("[!] ERR: Timer IRQ is masked\n");
 }
 
-void idle_thread() {
-  while(1);
+void test(char* s) {
+  print_str(s);
+  print_char('\n');
 }
 
-void alice() {
-  void* p = mkmalloc(10);
-  
-  print_str("Allocated obj at addr ");
-  print_qword((uint64_t) p);
-  print_char('\n');
+void reg_cmds() {
+  mk_register_cmd("test", &test);
+}
 
-  void* p2 = mkmalloc(10);
-  
-  print_str("Allocated obj at addr ");
-  print_qword((uint64_t) p2);
-  print_char('\n');
-  
-  mkfree(p);
-
-  void* p3 = mkmalloc(10);
-  
-  print_str("Allocated obj at addr ");
-  print_qword((uint64_t) p3);
-  print_char('\n');
-
-  mk_thread_kill();
+void idle_thread() {
+  while(1);
 }
 
 void debugging() {
@@ -71,17 +54,19 @@ void debugging() {
 }
 
 void kernel_main() {
-  mk_sys_init();
-  mk_initial_checks();
+  sys_init();
+  initial_checks();
+  
+  reg_cmds();
 
+  print_clear();
   print_menu();
   
   mk_thread_create(&idle_thread);
-  mk_thread_create(&alice);
   // debugging();
   
   
-  mk_start_timer();
+  start_timer();
 
   while(1);
 }

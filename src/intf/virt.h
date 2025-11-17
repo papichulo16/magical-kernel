@@ -11,9 +11,9 @@ extern uint64_t KERNEL_SIZE;
 extern uint64_t KERNEL_DATA_VMA;
 
 uint8_t* mk_vmmap_l1(uint8_t flags);
-uint8_t* mk_vmmap_l2(uint8_t flags);
+// uint8_t* mk_vmmap_l2(uint8_t flags);
 
 void mk_unmmap_l1(uint8_t* vaddr);
-void mk_unmmap_l2(uint8_t* vaddr);
+// void mk_unmmap_l2(uint8_t* vaddr);
 
 void mk_virt_init();
