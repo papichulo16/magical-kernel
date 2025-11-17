@@ -4,7 +4,7 @@
 #include "context.h"
 
 #define MAX_THREAD_PRIO 0x10
-#define THREAD_TIME_SLICE 4
+#define THREAD_TIME_SLICE 8
 
 enum ThreadState {
     MK_THREAD_KILLED,
@@ -30,6 +30,8 @@ struct mk_thread_obj {
 */
 
 struct mk_thread_obj {
+    char* thread_name;
+
     enum ThreadState state;
     struct regs_context regs;
 
@@ -54,7 +56,7 @@ struct mk_sema_t {
     struct mk_thread_obj* tail;
 };
 
-void mk_thread_create(void* entry, uint8_t prio);
+void mk_thread_create(void* entry, uint8_t prio, char* thread_name);
 void mk_thread_kill();
 
 int mk_thread_ctx_switch();

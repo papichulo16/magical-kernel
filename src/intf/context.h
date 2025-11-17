@@ -9,5 +9,4 @@ struct regs_context {
 };
 
 void mk_thread_ctx_save_from_stack(struct regs_context* ctx, uint64_t* stack);
-
 void mk_thread_ctx_restore_from_stack(struct regs_context* ctx, uint64_t* stack);

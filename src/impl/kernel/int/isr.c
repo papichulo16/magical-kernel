@@ -6,8 +6,12 @@
 #include "pic.h"
 #include "print.h"
 #include "thread.h"
+#include "slab.h"
+#include "virt.h"
 
 #include <stdint.h>
+
+#define SCHED_DEBUG 0
 
 bool shift = false;
 
@@ -117,18 +121,22 @@ struct mk_thread_obj *mk_working_thread;
 
 void mk_timer_int_handler(uint64_t *stack) {
 
+  disable_interrupts();
+
   mk_working_thread = mk_get_working_thread();
 
   if (mk_working_thread->time_slice > 0) {
     mk_working_thread->time_slice -= 1;
 
     mk_pic_send_eoi(0);
+    enable_interrupts();
 
     return;
   }
 
   if (!mk_working_thread->started) {
     mk_pic_send_eoi(0);
+    enable_interrupts();
     mk_working_thread->started = 1;
 
     mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
@@ -136,13 +144,52 @@ void mk_timer_int_handler(uint64_t *stack) {
     return;
   }
 
-  mk_thread_ctx_save_from_stack(&mk_working_thread->regs, stack);
+  if (mk_working_thread->state == MK_THREAD_WORKING || mk_working_thread->state == MK_THREAD_SLEEPING) {
+
+    mk_thread_ctx_save_from_stack(&mk_working_thread->regs, stack);
+
+    if (SCHED_DEBUG) {
+      print_str("[*] isr.c: ");
+      print_str(mk_working_thread->thread_name);
+      print_str(" ctx save rip ");
+      print_qword(mk_working_thread->regs.rip);
+      print_str(", rsp ");
+      print_qword(mk_working_thread->regs.rsp);
+      print_char('\n');
+    }
+
+  }
+  
+  if (mk_working_thread->state == MK_THREAD_KILLED) {
+
+    if (SCHED_DEBUG) {
+      print_str("[*] isr.c: ");
+      print_str(mk_working_thread->thread_name);
+      print_str(" thread free'd\n");
+    }
+
+    mk_unmmap_l1(mk_working_thread->stack_base);
+    mkfree(mk_working_thread);
+    mk_working_thread = 0;
+
+  }
 
   mk_pic_send_eoi(0);
 
   if (!mk_thread_ctx_switch()) {
     mk_working_thread = mk_get_working_thread();
 
+    if (SCHED_DEBUG) {
+      print_str("[*] isr.c: ");
+      print_str(mk_working_thread->thread_name);
+      print_str(" ctx restore rip ");
+      print_qword(mk_working_thread->regs.rip);
+      print_str(", rsp ");
+      print_qword(mk_working_thread->regs.rsp);
+      print_char('\n');
+    }
+
+    enable_interrupts();
     mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
   }
 }
@@ -182,7 +229,7 @@ void mk_keyboard() {
         cmd_pos = 0;
 
         print_str("$ ");
-
+        
         continue;
       }
 

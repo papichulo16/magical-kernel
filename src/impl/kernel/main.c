@@ -61,16 +61,24 @@ void bob() {
   mk_thread_kill();
 }
 
+void charlie() {
+  print_str("charlie\n");
+
+  mk_thread_kill();
+}
+
 void idle_thread() {
   while(1);
 }
 
-void debugging() {
-  uint32_t* addr = (uint32_t *) 0x1fffff0 + 0x010000000000;
-  *(uint32_t *) addr = (uint32_t) 0x41414141;
-  uint32_t test = *(uint32_t *) addr;
+void initialize_tasks() {
+  mk_thread_create(&idle_thread, 15, "idle_task");
+  mk_thread_create(&mk_keyboard, 0, "keyboard_task");
   
-  print_dword(test);
+  mk_create_sema(&sema, -1);
+  mk_thread_create(&alice, 14, "alice");
+  mk_thread_create(&bob, 15, "bob");
+  mk_thread_create(&charlie, 15, "charlie");
 }
 
 void kernel_main() {
@@ -82,14 +90,7 @@ void kernel_main() {
   print_clear();
   print_menu();
 
-  mk_create_sema(&sema, -1);
-  
-  mk_thread_create(&idle_thread, 15);
-  // mk_thread_create(&mk_keyboard, 0);
-  mk_thread_create(&alice, 14);
-  mk_thread_create(&bob, 15);
-  // debugging();
-  
+  initialize_tasks();
   
   start_timer();
 
