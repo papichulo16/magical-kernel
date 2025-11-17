@@ -166,7 +166,11 @@ void mk_keyboard_int_handler() {
             return;
         }
 
-        print_char(translate_scancode_set_1(scancode, shift));
+        char c = translate_scancode_set_1(scancode, shift);
+        print_char(c);
+        
+        if (c == '\n')
+            print_str("$ ");
     }
 
     mk_pic_send_eoi(1);

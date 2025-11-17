@@ -166,12 +166,12 @@ void print_menu() {
     print_str("This is a work in progress, I am pretty busy and lazy so this will be shit and slow paced... but hopefully I get something done!\n\n");
 
     print_set_color(PRINT_COLOR_BLACK, PRINT_COLOR_LIGHT_GREEN);
-    print_str("Author: Luis Abraham\n");
+    print_str("Author: papichulo\n");
     print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_BLACK);
     
     for (int i = 0; i < NUM_COLS; i++)
         print_char('-');
     
-    print_char('\n');
+    print_str("\n$ ");
 }
 

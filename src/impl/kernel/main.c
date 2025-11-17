@@ -2,6 +2,7 @@
 #include "inlines.c"
 
 #include "page.h"
+#include "slab.h"
 #include "virt.h"
 #include "idt.h"
 #include "pic.h"
@@ -38,7 +39,25 @@ void idle_thread() {
 }
 
 void alice() {
-  print_str("alice\n");
+  void* p = mkmalloc(10);
+  
+  print_str("Allocated obj at addr ");
+  print_qword((uint64_t) p);
+  print_char('\n');
+
+  void* p2 = mkmalloc(10);
+  
+  print_str("Allocated obj at addr ");
+  print_qword((uint64_t) p2);
+  print_char('\n');
+  
+  mkfree(p);
+
+  void* p3 = mkmalloc(10);
+  
+  print_str("Allocated obj at addr ");
+  print_qword((uint64_t) p3);
+  print_char('\n');
 
   mk_thread_kill();
 }
