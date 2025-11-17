@@ -1,3 +1,4 @@
+/*
 #include "thread.h"
 #include "page.h"
 #include "print.h"
@@ -83,3 +84,4 @@ int mk_thread_ctx_switch() {
 struct mk_thread_obj* mk_get_working_thread() {
     return &threads[thread_pos];
 }
+*/

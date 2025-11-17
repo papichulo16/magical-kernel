@@ -2,6 +2,7 @@
 #include "page.h"
 #include "print.h"
 #include "virt.h"
+#include "inlines.c"
 
 #include <stdint.h>
 
@@ -117,9 +118,12 @@ void reclaim_slab (struct mk_cache_node_t* c, struct mk_slab_t* s) {
 void* mkmalloc (uint32_t s) {
     int id = get_bucket_id(s);
     void* p = 0;
+
+    disable_interrupts();
     
     if (id >= NUM_BUCKETS) {
         print_error("[!] slab.c: mkmalloc size too large\n");
+        enable_interrupts();
 
         return 0;
     }
@@ -134,16 +138,22 @@ void* mkmalloc (uint32_t s) {
         p = alloc_from_slab(main_cache.buckets[id]);
     }
     
+    enable_interrupts();
+
     return p;
 }
 
 void mkfree (void* p) {
     struct mk_slab_t* header = (struct mk_slab_t *) ((uint64_t) p & ~0xfff);
+
+    disable_interrupts();
     
     if (((uint64_t) p - ((uint64_t) header + sizeof(struct mk_slab_t)))
         % header->size != 0) {
         
         print_error("[!] slab.c: misaligned free\n");
+        enable_interrupts();
+
         return;
     }
     
@@ -161,4 +171,6 @@ void mkfree (void* p) {
     if (header->free_count >= header->max) {
         reclaim_slab(&main_cache, header);
     }
+
+    enable_interrupts();
 }

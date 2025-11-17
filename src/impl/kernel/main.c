@@ -5,10 +5,13 @@
 #include "page.h"
 #include "virt.h"
 #include "idt.h"
+#include "isr.h"
 #include "pic.h"
 #include "thread.h"
 
 #include <stdint.h>
+
+void* sema;
 
 void initial_checks() {
   if (!are_interrupts_enabled())
@@ -42,6 +45,22 @@ void reg_cmds() {
   mk_register_cmd("clear", "clear screen", &print_user_clear, 1);
 }
 
+void alice() {
+  mk_sema_take(sema); 
+
+  print_str("alice\n");
+  
+  mk_thread_kill();
+}
+
+void bob() {
+  print_str("bob\n");
+  
+  mk_sema_give(sema);
+
+  mk_thread_kill();
+}
+
 void idle_thread() {
   while(1);
 }
@@ -62,8 +81,13 @@ void kernel_main() {
 
   print_clear();
   print_menu();
+
+  mk_create_sema(&sema, -1);
   
-  mk_thread_create(&idle_thread);
+  mk_thread_create(&idle_thread, 15);
+  // mk_thread_create(&mk_keyboard, 0);
+  mk_thread_create(&alice, 14);
+  mk_thread_create(&bob, 15);
   // debugging();
   
   

@@ -46,6 +46,9 @@ void cmd_help() {
 
 void mk_handle_cmd(char *cmd) {
     struct cmd_t* cur = cmd_list_head;
+
+    if (*cmd == 0) 
+        return;
     
     while (cur != 0) {
         if (_strcmp(cur->cmd, cmd) != 0) {
@@ -57,6 +60,7 @@ void mk_handle_cmd(char *cmd) {
 
         return;
     }
+    
     
     int pos = _strchr(cmd, ' ');
     
