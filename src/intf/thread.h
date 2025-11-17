@@ -27,6 +27,11 @@ struct mk_thread_obj {
     uint8_t* stack_base;
 };
 
+void _mk_thread_create(void* entry);
+void _mk_thread_kill();
+
+int _mk_thread_ctx_switch();
+
 void mk_thread_create(void* entry);
 void mk_thread_kill();
 

@@ -5,8 +5,6 @@
 #include "inlines.c"
 #include "virt.h"
 
-// this setup is temporary, once I have a kmalloc() implementation
-// I will make this better
 struct mk_thread_obj threads[MAX_THREADS];
 uint8_t thread_pos = 0;
 

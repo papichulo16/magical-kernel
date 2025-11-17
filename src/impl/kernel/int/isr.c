@@ -176,7 +176,7 @@ void mk_keyboard_int_handler() {
             print_char(c);
 
             mk_handle_cmd((char *) &cmd_buf);
-            memset(&cmd_buf, 0, sizeof(cmd_buf));
+            _memset(&cmd_buf, 0, sizeof(cmd_buf));
             cmd_pos = 0;
 
             print_str("$ ");

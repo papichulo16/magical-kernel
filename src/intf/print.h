@@ -23,6 +23,7 @@ enum {
 };
 
 void print_clear();
+void print_user_clear();
 
 void print_char(char character);
 void print_str(char* str);

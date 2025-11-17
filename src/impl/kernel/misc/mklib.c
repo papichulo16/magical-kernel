@@ -1,12 +1,12 @@
 #include "mklib.h"
 #include <stdint.h>
 
-void memset(void *p, char c, uint32_t n) {
+void _memset(void *p, char c, uint32_t n) {
     for (uint32_t i = 0; i < n; i++)
         *(char *) p++ = c;
 }
 
-int strcmp(char *s1, char *s2) {
+int _strcmp(char *s1, char *s2) {
     int off = 0;
     
     while (*(s1 + off) != 0) {
@@ -20,7 +20,7 @@ int strcmp(char *s1, char *s2) {
     return 0;
 }
 
-uint32_t strlen(char* s) {
+uint32_t _strlen(char* s) {
     int off = 0;
 
     while (*(s + off) != 0) {
@@ -30,7 +30,7 @@ uint32_t strlen(char* s) {
     return off;
 }
 
-int strchr(char *s, char c) {
+int _strchr(char *s, char c) {
     int off = 0;
 
     while (*(s + off) != 0) {

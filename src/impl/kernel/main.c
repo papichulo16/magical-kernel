@@ -38,7 +38,8 @@ void test(char* s) {
 }
 
 void reg_cmds() {
-  mk_register_cmd("test", &test);
+  mk_register_cmd("help", "list all cmds", &cmd_help, 1);
+  mk_register_cmd("clear", "clear screen", &print_user_clear, 1);
 }
 
 void idle_thread() {

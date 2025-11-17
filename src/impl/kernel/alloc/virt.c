@@ -58,7 +58,7 @@ void alloc_l3_table(uint64_t p) {
         return;
 
     cr3[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
-    memset((void *) (cr3[idx] & ~0xfff), 0, PAGE_SIZE);
+    _memset((void *) (cr3[idx] & ~0xfff), 0, PAGE_SIZE);
 }
 
 uint64_t* get_l2_table(uint64_t p) {
@@ -79,7 +79,7 @@ void alloc_l2_table(uint64_t p) {
         return;
 
     l3[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
-    memset((void *) (l3[idx] & ~0xfff), 0, PAGE_SIZE);
+    _memset((void *) (l3[idx] & ~0xfff), 0, PAGE_SIZE);
 }
 
 uint64_t* get_l1_table(uint64_t p) {
@@ -100,7 +100,7 @@ void alloc_l1_table(uint64_t p) {
         return;
 
     l2[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
-    memset((void *) (l2[idx] & ~0xfff), 0, PAGE_SIZE);
+    _memset((void *) (l2[idx] & ~0xfff), 0, PAGE_SIZE);
 }
 
 

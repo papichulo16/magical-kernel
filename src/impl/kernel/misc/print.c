@@ -41,6 +41,16 @@ void print_clear() {
     }
 }
 
+void print_user_clear() {
+    for (size_t i = NUM_MENU_ROWS; i < NUM_ROWS; i++) {
+        clear_row(i);
+    }
+    
+    col = 0;
+    row = NUM_MENU_ROWS;
+}
+
+
 void print_newline() {
     col = 0;
 
