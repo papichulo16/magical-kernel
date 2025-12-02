@@ -73,12 +73,12 @@ void idle_thread() {
 
 void initialize_tasks() {
   mk_thread_create(&idle_thread, 15, "idle_task");
-  mk_thread_create(&mk_keyboard, 0, "keyboard_task");
+  // mk_thread_create(&mk_keyboard, 0, "keyboard_task");
   
-  mk_create_sema(&sema, -1);
-  mk_thread_create(&alice, 14, "alice");
-  mk_thread_create(&bob, 15, "bob");
-  mk_thread_create(&charlie, 15, "charlie");
+  // mk_create_sema(&sema, -1);
+  // mk_thread_create(&alice, 14, "alice");
+  // mk_thread_create(&bob, 15, "bob");
+  // mk_thread_create(&charlie, 15, "charlie");
 }
 
 void kernel_main() {

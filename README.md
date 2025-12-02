@@ -5,9 +5,13 @@
 
 right now the working features are as follows:
  - interrupt handling
+ - exception handling
  - multithreading in kernel space
- - input/output
+ - multithread synchronization (currently broken)
  - virtual memory
+ - kernel slab allocator
+ - input/output
+ - terminal UI and command handling
 
 ### goal
 
