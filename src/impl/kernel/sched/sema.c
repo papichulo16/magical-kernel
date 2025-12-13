@@ -3,7 +3,30 @@
 #include "print.h"
 #include "inlines.c"
 
-#define SEMA_DEBUG 0
+#define SEMA_DEBUG 1
+
+void sema_enq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
+    mk_t_arr_deq(0);
+
+    t->next = 0;
+    t->prev = 0;
+
+    if (!sema->head) {
+        sema->head = t;
+    } else {
+        sema->tail->next = t;
+    }
+
+    sema->tail = t; 
+}
+
+void sema_deq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
+    sema->head = t->next;
+    if (sema->head == 0)
+        sema->tail = 0;
+
+    mk_t_arr_enq(t);
+}
 
 void mk_create_sema(void** dst, int start) {
     struct mk_sema_t* p = mkmalloc(sizeof(struct mk_sema_t));
@@ -24,16 +47,13 @@ void mk_sema_give(struct mk_sema_t* sema) {
         return;
 
     t->state = MK_THREAD_READY;
-    sema->head = t->sema_next;
+    sema_deq(sema, t);
 
     if (SEMA_DEBUG) {
         print_str("[*] sema.c: woken thread ");
         print_str(t->thread_name);
         print_char('\n');
     }
-    
-    if (sema->head == 0)
-        sema->tail = 0;
 }
 
 void mk_sema_take(struct mk_sema_t* sema) {
@@ -41,25 +61,22 @@ void mk_sema_take(struct mk_sema_t* sema) {
 
     struct mk_thread_obj* t = mk_get_working_thread();
     
-    t->state = MK_THREAD_SLEEPING;
-    t->sema_next = 0;
+    if (sema->state < 1) {
+	t->state = MK_THREAD_SLEEPING;
 
-    if (!sema->head)
-        sema->head = t;
-    else
-        sema->tail->sema_next = t;
-
-    sema->tail = t; 
-    
-    if (SEMA_DEBUG) {
-        print_str("[*] sema.c: thread ");
-        print_str(t->thread_name);
-        print_str(" sleeping\n");
+    	if (SEMA_DEBUG) {
+	    print_str("[*] sema.c: thread ");
+	    print_str(t->thread_name);
+	    print_str(" sleeping\n");
+    	 }
     }
+
+    sema->state--;
+    sema_enq(sema, t);
     
     enable_interrupts();
 
-    while (sema->state < 0);// && t->state == MK_THREAD_SLEEPING);
+    while (t->state == MK_THREAD_SLEEPING);
     
     if (SEMA_DEBUG) {
         print_str("[*] sema.c: thread ");
@@ -68,5 +85,4 @@ void mk_sema_take(struct mk_sema_t* sema) {
     }
 
     t->state = MK_THREAD_WORKING;
-    sema->state--;
 }

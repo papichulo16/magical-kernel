@@ -80,7 +80,7 @@ void mk_pit_init(uint32_t frequency) {
 void mk_pic_init() {
     mk_pic_remap(0x20,0x28);
     
-    // mk_irq_clear_mask(0); // enable timer interrupts
+    mk_irq_clear_mask(0); // enable timer interrupts
     mk_irq_clear_mask(1); // enable keyboard interrupts
 
     __asm__ volatile ("sti"); // set the interrupt flag

@@ -48,37 +48,32 @@ void reg_cmds() {
 void alice() {
   mk_sema_take(sema); 
 
-  print_str("alice\n");
+  print_str("this should print after\n");
   
   mk_thread_kill();
 }
 
 void bob() {
-  print_str("bob\n");
+  print_str("this should print before\n");
   
   mk_sema_give(sema);
 
   mk_thread_kill();
 }
 
-void charlie() {
-  print_str("charlie\n");
-
-  mk_thread_kill();
-}
 
 void idle_thread() {
   while(1);
 }
 
 void initialize_tasks() {
-  mk_thread_create(&idle_thread, 15, "idle_task");
-  // mk_thread_create(&mk_keyboard, 0, "keyboard_task");
+  mk_thread_create(&idle_thread, "idle_task");
+  // mk_thread_create(&mk_keyboard, "keyboard_task");
   
-  // mk_create_sema(&sema, -1);
-  // mk_thread_create(&alice, 14, "alice");
-  // mk_thread_create(&bob, 15, "bob");
-  // mk_thread_create(&charlie, 15, "charlie");
+  mk_create_sema(&sema, 0);
+  mk_thread_create(&alice, "alice");
+  mk_thread_create(&bob, "bob");
+  // mk_thread_create(&charlie, "charlie");
 }
 
 void kernel_main() {
