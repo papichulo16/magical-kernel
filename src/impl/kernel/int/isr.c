@@ -117,10 +117,12 @@ void mk_exception_handler(isr_xframe_t *frame) {
 }
 
 struct regs_context tmp;
-struct mk_thread_obj *mk_working_thread;
+struct mk_thread_obj* mk_working_thread;
+struct mk_sema_t* sema_sig = 0;
 
 void t_res_state(uint64_t* stack) {
     mk_working_thread = mk_get_working_thread();
+    mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
 
     if (SCHED_DEBUG) {
       print_str("[*] isr.c: ");
@@ -132,11 +134,11 @@ void t_res_state(uint64_t* stack) {
       print_char('\n');
     }
 
-    mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
 }
 
 void t_init(uint64_t* stack) {
     mk_working_thread->started = 1;
+    mk_working_thread->state = MK_THREAD_WORKING;
 
     mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
 }
@@ -155,18 +157,40 @@ void t_save(uint64_t* stack) {
     }
 }
 
-void t_free() {
-    if (SCHED_DEBUG) {
-      print_str("[*] isr.c: ");
-      print_str(mk_working_thread->thread_name);
-      print_str(" thread free'd\n");
-    }
+int t_dis_by_state(uint64_t* stack) {
 
-    mk_unmmap_l1(mk_working_thread->stack_base);
-    mkfree(mk_working_thread);
+  switch (mk_working_thread->state) {
+
+    case MK_THREAD_KILLED:
+	break;
+
+    case MK_THREAD_WORKING:
+	t_save(stack);
+
+    	break;
+
+    case MK_THREAD_SLEEPING:
+	t_save(stack);
+
+	if(sema_sig)
+		mk_sema_enq(sema_sig, mk_working_thread);
+
+	sema_sig = 0;
+
+    	break;
+
+    default:
+	return 1;
+  }
+
+  return 0;
 }
 
-void mk_timer_int_handler(uint64_t *stack) {
+void mk_sema_sig_set(struct mk_sema_t* sema) {
+  sema_sig = sema;
+}
+
+void mk_timer_int_handler(uint64_t* stack) {
   disable_interrupts();
 
   _mk_timer_int_handler(stack);
@@ -175,8 +199,7 @@ void mk_timer_int_handler(uint64_t *stack) {
   mk_pic_send_eoi(0);
 }
 
-void _mk_timer_int_handler(uint64_t *stack) {
-
+void _mk_timer_int_handler(uint64_t* stack) {
 
   mk_working_thread = mk_get_working_thread();
 
@@ -192,22 +215,11 @@ void _mk_timer_int_handler(uint64_t *stack) {
     return;
   }
 
-  if (mk_working_thread->state == MK_THREAD_WORKING 
-		  || mk_working_thread->state == MK_THREAD_SLEEPING) {
-
-    t_save(stack);
-
-  }
-
-  int r = mk_thread_ctx_switch();
-  
-  if (mk_working_thread->state == MK_THREAD_KILLED) {
-      t_free();
-  }
-
-  if (r == 0) {
+  if (!t_dis_by_state(stack)) {
+      mk_thread_ctx_switch();
       t_res_state(stack);
   }
+
 }
 
 void *keyboard_sema;

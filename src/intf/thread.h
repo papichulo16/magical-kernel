@@ -4,7 +4,7 @@
 #include "context.h"
 
 #define MAX_THREAD_PRIO 0x10
-#define THREAD_TIME_SLICE 1
+#define THREAD_TIME_SLICE 10
 
 enum ThreadState {
     MK_THREAD_KILLED,
@@ -62,10 +62,15 @@ void mk_thread_kill();
 int mk_thread_ctx_switch();
 struct mk_thread_obj* mk_get_working_thread();
 
+void mk_t_arr_enq(struct mk_thread_obj* t);
+void mk_t_arr_deq(int free);
+
 void mk_create_sema(void** dst, int start);
 void mk_sema_give(struct mk_sema_t* sema);
 void mk_sema_take(struct mk_sema_t* sema);
 
-void mk_t_arr_enq(struct mk_thread_obj* t);
-void mk_t_arr_deq(int free);
+void mk_sema_enq(struct mk_sema_t* sema, struct mk_thread_obj* t);
+void mk_sema_deq(struct mk_sema_t* sema, struct mk_thread_obj* t);
+
+void mk_sema_sig_set(struct mk_sema_t* sema);
 

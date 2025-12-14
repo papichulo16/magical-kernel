@@ -3,9 +3,9 @@
 #include "print.h"
 #include "inlines.c"
 
-#define SEMA_DEBUG 1
+#define SEMA_DEBUG 0
 
-void sema_enq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
+void mk_sema_enq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
     mk_t_arr_deq(0);
 
     t->next = 0;
@@ -20,7 +20,7 @@ void sema_enq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
     sema->tail = t; 
 }
 
-void sema_deq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
+void mk_sema_deq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
     sema->head = t->next;
     if (sema->head == 0)
         sema->tail = 0;
@@ -47,7 +47,7 @@ void mk_sema_give(struct mk_sema_t* sema) {
         return;
 
     t->state = MK_THREAD_READY;
-    sema_deq(sema, t);
+    mk_sema_deq(sema, t);
 
     if (SEMA_DEBUG) {
         print_str("[*] sema.c: woken thread ");
@@ -63,16 +63,17 @@ void mk_sema_take(struct mk_sema_t* sema) {
     
     if (sema->state < 1) {
 	t->state = MK_THREAD_SLEEPING;
+	mk_sema_sig_set(sema);
 
     	if (SEMA_DEBUG) {
 	    print_str("[*] sema.c: thread ");
 	    print_str(t->thread_name);
 	    print_str(" sleeping\n");
-    	 }
+	}
     }
 
     sema->state--;
-    sema_enq(sema, t);
+    t->time_slice = 0;
     
     enable_interrupts();
 

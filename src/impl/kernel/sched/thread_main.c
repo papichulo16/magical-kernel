@@ -67,8 +67,13 @@ void mk_t_arr_deq(int free) {
 
     working_thread = working_thread->next;
 
-    if (free)
+    if (free) {
+
+	if (cur->stack_base)
+		mk_unmmap_l1(cur->stack_base);
+
 	mkfree(cur);
+    }
 }
 
 void mk_thread_create(void* entry, char* thread_name) {
@@ -84,16 +89,15 @@ void mk_thread_kill() {
     disable_interrupts();
     
     if (THREAD_DEBUG) {
-        print_str("[*] rtos_thread.c: thread ");
+        print_str("[*] thread_main.c: thread ");
         print_str(working_thread->thread_name);
         print_str(" done\n");
     }
     
+    // thread obj is free'd in timer int handler
     working_thread->state = MK_THREAD_KILLED;
     working_thread->time_slice = 0;
     working_thread->regs.rip = (uint64_t) &mk_thread_idle;
-
-    // thread obj is free'd in timer int handler
 
     enable_interrupts();
     
@@ -103,7 +107,7 @@ void mk_thread_kill() {
 void t_switch(struct mk_thread_obj* cur) {
 
     if (THREAD_DEBUG) {
-	print_str("[*] rtos_thread.c: thread ");
+	print_str("[*] thread_main.c: thread ");
 	print_str(cur->thread_name);
 	print_str(" ready\n");
     }
@@ -117,8 +121,18 @@ void t_switch(struct mk_thread_obj* cur) {
 
 int mk_thread_ctx_switch() {
 
-    if (working_thread->state == MK_THREAD_KILLED)
+    if (working_thread->state == MK_THREAD_KILLED) {
 	mk_t_arr_deq(1);
+
+	if (THREAD_DEBUG) {
+	      print_str("[*] thread_main.c: ");
+	      print_str(working_thread->thread_name);
+	      print_str(" thread free'd\n");
+	}
+
+	disable_interrupts();
+	mk_thread_idle();
+    }
 
     struct mk_thread_obj* cur = working_thread;
 
