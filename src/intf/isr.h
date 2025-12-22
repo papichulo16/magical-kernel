@@ -45,7 +45,7 @@ typedef struct {
     } base_frame;
 } isr_xframe_t;
 
-__attribute__((noreturn)) void mk_exception_handler(isr_xframe_t* frame);
+__attribute__((noreturn)) void mk_exception_handler(uint64_t stack, uint64_t vector);
 void halt();
 
 void mk_keyboard_int_handler(void);

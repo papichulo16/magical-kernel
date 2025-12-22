@@ -70,10 +70,10 @@ void initialize_tasks() {
   mk_thread_create(&idle_thread, "idle_task");
   // mk_thread_create(&mk_keyboard, "keyboard_task");
   
-  mk_create_sema(&sema, 0);
-  mk_thread_create(&alice, "alice");
-  mk_thread_create(&bob, "bob");
-  // mk_thread_create(&charlie, "charlie");
+  //mk_create_sema(&sema, 0);
+  //mk_thread_create(&alice, "alice");
+  //mk_thread_create(&bob, "bob");
+  //mk_thread_create(&charlie, "charlie");
 }
 
 void kernel_main() {
