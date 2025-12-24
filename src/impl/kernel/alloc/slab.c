@@ -144,15 +144,18 @@ void* mkmalloc (uint32_t s) {
 }
 
 void mkfree (void* p) {
+    disable_interrupts();
+    _mkfree (p);
+    enable_interrupts();
+}
+
+void _mkfree (void* p) {
     struct mk_slab_t* header = (struct mk_slab_t *) ((uint64_t) p & ~0xfff);
 
-    disable_interrupts();
-    
     if (((uint64_t) p - ((uint64_t) header + sizeof(struct mk_slab_t)))
         % header->size != 0) {
         
         print_error("[!] slab.c: misaligned free\n");
-        enable_interrupts();
 
         return;
     }
@@ -171,6 +174,4 @@ void mkfree (void* p) {
     if (header->free_count >= header->max) {
         reclaim_slab(&main_cache, header);
     }
-
-    enable_interrupts();
 }

@@ -3,15 +3,6 @@
 #include "slab.h"
 #include "mklib.h"
 
-struct cmd_t {
-    char* cmd;
-    char* desc;
-    void* entry;
-    
-    int list;
-    
-    struct cmd_t* next;
-};
 
 struct cmd_t* cmd_list_head = 0;
 
@@ -32,8 +23,11 @@ void cmd_help() {
     
     print_str("--- list of available cmds ---\n");
     while (cur != 0) {
-        if (!cur->list)
+        if (!cur->list) {
+
+            //cur = cur->next;
             continue;
+	}
 
         print_str(cur->cmd);
         print_str(" - ");

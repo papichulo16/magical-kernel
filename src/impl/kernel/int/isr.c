@@ -131,7 +131,6 @@ struct mk_thread_obj* mk_working_thread;
 struct mk_sema_t* sema_sig = 0;
 
 void t_res_state(uint64_t* stack) {
-    mk_working_thread = mk_get_working_thread();
     mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
 
     if (SCHED_DEBUG) {
@@ -143,7 +142,6 @@ void t_res_state(uint64_t* stack) {
       print_qword(mk_working_thread->regs.rsp);
       print_char('\n');
     }
-
 }
 
 void t_init(uint64_t* stack) {
@@ -227,6 +225,8 @@ void _mk_timer_int_handler(uint64_t* stack) {
 
   if (!t_dis_by_state(stack)) {
       mk_thread_ctx_switch();
+
+      mk_working_thread = mk_get_working_thread();
       t_res_state(stack);
   }
 

@@ -29,13 +29,14 @@ void mk_sema_deq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
 }
 
 void mk_create_sema(void** dst, int start) {
+    print_str("allocating sema\n");
     struct mk_sema_t* p = mkmalloc(sizeof(struct mk_sema_t));
 
-    p->state = start;
-    p->head = 0;
-    p->tail = 0;
+    //p->state = start;
+    //p->head = 0;
+    //p->tail = 0;
 
-    *dst = p;
+    //*(struct mk_sema_t **) dst = p;
 }
 
 void mk_sema_give(struct mk_sema_t* sema) {

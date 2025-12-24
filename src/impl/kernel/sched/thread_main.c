@@ -6,7 +6,7 @@
 #include "slab.h"
 #include <stdint.h>
 
-#define THREAD_DEBUG 1
+#define THREAD_DEBUG 0
 
 // this would be for priority based scheduling, right now the implementation will be R-R
 // struct mk_thread_obj* prio_thread_arr[MAX_THREAD_PRIO];

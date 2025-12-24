@@ -7,7 +7,7 @@ right now the working features are as follows:
  - interrupt handling
  - exception handling
  - multithreading in kernel space
- - multithread synchronization (currently broken)
+ - multithread synchronization 
  - virtual memory
  - kernel slab allocator
  - input/output
