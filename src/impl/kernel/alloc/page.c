@@ -59,7 +59,7 @@ void mk_page_alloc_init() {
     phys_allocator.total = NUM_PAGES;
     
     // mark the already allocated memory from boot as used
-    for (uint64_t i = 0; i < 0x2000; i++) {
+    for (uint64_t i = 0; i < RESB_KERN_PAGES; i++) {
         set_bit(i);
     }
 }

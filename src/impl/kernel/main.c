@@ -85,11 +85,11 @@ void initialize_tasks() {
 }
 
 void kernel_main() {
-  sys_init();
-  initial_checks();
-  
   print_clear();
   print_menu();
+
+  sys_init();
+  initial_checks();
 
   reg_cmds();
   initialize_tasks();

@@ -51,7 +51,7 @@ void* g_ptable_vaddr_l1(uint8_t* paddr) {
     for (int i = 0; i < 512; i++) {
 	if (((uint64_t) l1_tbl[i] & ~0xfff) == ((uint64_t) paddr & ~0xfff)) {
 
-	    return l1_tbl + (i << 12);
+	    return (void *)((uint64_t) l1_tbl + (i << 12));
 	}
     }
 
@@ -61,18 +61,35 @@ void* g_ptable_vaddr_l1(uint8_t* paddr) {
     return 0;
 }
 
+void* c_page_tbl() {
+    uint8_t** l1_tbl = (uint8_t **) KERNEL_TABLES_VMA;
+
+    for (int i = 0; i < 512; i++) {
+	if (l1_tbl[i] == 0) {
+	    void* page = mk_phys_page_alloc();
+
+    	    l1_tbl[i] = (uint64_t) page | PRESENT | WRITE;
+
+	    return page;
+	}
+    }
+
+    print_error("[*] virt.c: page table free entry found! space ran out!\n");
+    while (1);
+
+    return 0;
+}
+
 uint64_t* get_l3_table(uint64_t p) {
-    //uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
-    uint64_t* cr3 = get_cr3();
+    uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
     uint64_t idx = L4_INDEX(p);
-    
+
     return (uint64_t *) (cr3[idx] & ~0xfff);
 }
 
 // returns ptr used to get to the table, not table addr
 uint64_t alloc_l3_table(uint64_t p) {
-    //uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
-    uint64_t* cr3 = get_cr3();
+    uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
     uint64_t idx = L4_INDEX(p);
 
     // check for huge pages
@@ -82,14 +99,14 @@ uint64_t alloc_l3_table(uint64_t p) {
     if (cr3[idx] != 0) 
         return p;
 
-    cr3[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
-    _memset((void *) (cr3[idx] & ~0xfff), 0, PAGE_SIZE);
+    cr3[idx] = (uint64_t) c_page_tbl() | PRESENT | WRITE;
+    //_memset((void *) (cr3[idx] & ~0xfff), 0, PAGE_SIZE);
 
     return p;
 }
 
 uint64_t* get_l2_table(uint64_t p) {
-    uint64_t* l3 = get_l3_table(p);
+    uint64_t* l3 = g_ptable_vaddr_l1((uint8_t *)get_l3_table(p));
     uint64_t idx = L3_INDEX(p);
     
     if (!l3)
@@ -102,7 +119,7 @@ uint64_t* get_l2_table(uint64_t p) {
 uint64_t alloc_l2_table(uint64_t p) {
     p = alloc_l3_table(p);
 
-    uint64_t* l3 = get_l3_table(p);
+    uint64_t* l3 = g_ptable_vaddr_l1((uint8_t *)get_l3_table(p));
     uint64_t idx = L3_INDEX(p);
     
     // check for huge pages
@@ -112,14 +129,14 @@ uint64_t alloc_l2_table(uint64_t p) {
     if (l3[idx] != 0) 
         return p;
 
-    l3[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
-    _memset((void *) (l3[idx] & ~0xfff), 0, PAGE_SIZE);
+    l3[idx] = (uint64_t) c_page_tbl() | PRESENT | WRITE;
+    //_memset((void *) (l3[idx] & ~0xfff), 0, PAGE_SIZE);
 
     return p;
 }
 
 uint64_t* get_l1_table(uint64_t p) {
-    uint64_t* l2 = get_l2_table(p);
+    uint64_t* l2 = g_ptable_vaddr_l1((uint8_t *)get_l2_table(p));
     uint64_t idx = L2_INDEX(p);
 
     if (!l2)
@@ -132,7 +149,7 @@ uint64_t* get_l1_table(uint64_t p) {
 uint64_t alloc_l1_table(uint64_t p) {
     p = alloc_l2_table(p);
 
-    uint64_t* l2 = get_l2_table(p);
+    uint64_t* l2 = g_ptable_vaddr_l1((uint8_t *)get_l2_table(p));
     uint64_t idx = L2_INDEX(p);
     
     // check for huge pages
@@ -142,14 +159,14 @@ uint64_t alloc_l1_table(uint64_t p) {
     if (l2[idx] != 0) 
         return p;
 
-    l2[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
-    _memset((void *) (l2[idx] & ~0xfff), 0, PAGE_SIZE);
+    l2[idx] = (uint64_t) c_page_tbl() | PRESENT | WRITE;
+    //_memset((void *) (l2[idx] & ~0xfff), 0, PAGE_SIZE);
 
     return p;
 }
 
 uint64_t* get_l1_idx(uint64_t p) {
-    uint64_t* l1 = get_l1_table(p);
+    uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *)get_l1_table(p));
     uint64_t idx = L1_INDEX(p);
 
     if (!l1)
@@ -176,7 +193,7 @@ int map_l1(uint64_t p) {
     if (get_l1_idx(p))
         return -1;
     
-    uint64_t* l1 = get_l1_table(p);
+    uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *)get_l1_table(p));
     l1[L1_INDEX(p)] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
 
     return 0;
@@ -192,7 +209,7 @@ uint8_t* mk_vmmap_l1(uint8_t flags) {
 }
 
 void mk_unmmap_l1(uint8_t *vaddr) {
-    uint8_t** l1 = (uint8_t **) get_l1_table((uint64_t) vaddr);
+    uint64_t** l1 = g_ptable_vaddr_l1((uint8_t *)get_l1_table(vaddr));
     
     if (l1 == 0)
         return;
@@ -205,21 +222,7 @@ void mk_unmmap_l1(uint8_t *vaddr) {
 }
 
 void mk_virt_init() {
-    uint64_t* cr3 = phys_to_kern_virt((uint8_t*) get_cr3());
 
-    /* 
-     
-    TOO MUCH PAIN IN THE ASS DEALING WITH ALL VIRTUAL ADDRESSES
-    CALL ME A BITCH, BUT THIS IS GONNA MAKE MY LIFE A LOT EASIER
-
-    // clear the first entries from L4 and L3, they are doubled up
-    uint64_t* l3_table = (uint64_t *) ((uint64_t) phys_to_kern_virt((uint8_t *) cr3[0]) & ~0xfff);
-    
-    l3_table[0] = 0;
-    cr3[0] = 0;
-
-    */
-    
     KERNEL_SIZE = (((uint64_t) KERNEL_VIRT_END - (uint64_t) KERNEL_VIRT_START) & ~0xfff) + 0x1000;
 
     if (KERNEL_SIZE > RESB_KERN_SIZE) {
@@ -229,4 +232,11 @@ void mk_virt_init() {
 
     KERNEL_DATA_VMA = (uint64_t) KERNEL_VMA + (uint64_t) RESB_KERN_SIZE;
     KERNEL_TABLES_VMA = 0xffffffff40000000;
+
+    // disable physical memory mappings
+    uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
+    uint64_t* l3_table = (uint64_t *) ((uint64_t) g_ptable_vaddr_l1((uint8_t *) cr3[0]) & ~0xfff);
+    
+    l3_table[0] = 0;
+    cr3[0] = 0;
 }
