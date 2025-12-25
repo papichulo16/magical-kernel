@@ -16,6 +16,8 @@ right now the working features are as follows:
 ### goal
 
 the goal is to have working IO, separate kernel/user space, a file system, and DOOM running.......
+
+
 I am pretty busy so this will be a VERY slow process, but we will see how it goes.
 
 ### building
