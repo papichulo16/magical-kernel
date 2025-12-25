@@ -8,12 +8,11 @@
 #include "thread.h"
 #include "slab.h"
 #include "virt.h"
+#include "drivers.h"
 
 #include <stdint.h>
 
 #define SCHED_DEBUG 0
-
-bool shift = false;
 
 char* __exception_labels[] = {
       "[0x00] Divide by Zero Exception",
@@ -49,9 +48,6 @@ char* __exception_labels[] = {
       "[0x1E] Security Exception",
       "[0x1F] Inexplicable Error"
 };
-
-char cmd_buf[256];
-uint8_t cmd_pos = 0;
 
 void __dump_registers(struct regs_context* frame) {
   print_str("\n\nprocess register dump:\nrip: ");
@@ -147,6 +143,7 @@ void t_res_state(uint64_t* stack) {
 void t_init(uint64_t* stack) {
     mk_working_thread->started = 1;
     mk_working_thread->state = MK_THREAD_WORKING;
+    mk_working_thread->time_slice = THREAD_TIME_SLICE;
 
     mk_thread_ctx_restore_from_stack(&mk_working_thread->regs, stack);
 }
@@ -203,9 +200,11 @@ void mk_timer_int_handler(uint64_t* stack) {
 
   _mk_timer_int_handler(stack);
 
-  enable_interrupts();
   mk_pic_send_eoi(0);
+  enable_interrupts();
 }
+
+int first_thread = 0;
 
 void _mk_timer_int_handler(uint64_t* stack) {
 
@@ -217,9 +216,11 @@ void _mk_timer_int_handler(uint64_t* stack) {
     return;
   }
 
-  if (!mk_working_thread->started) {
+  if (!first_thread) {
 
     t_init(stack);
+    first_thread = 1;
+
     return;
   }
 
@@ -232,108 +233,8 @@ void _mk_timer_int_handler(uint64_t* stack) {
 
 }
 
-void *keyboard_sema;
-
-void mk_keyboard() {
-
-  mk_create_sema(&keyboard_sema, -1);
-
-  while (1) {
-    // status register bit 1 = output  buffer status
-    if ((inb(0x64) & 1) == 0)
-      continue;
-
-    uint8_t scancode = inb(0x60); // read the data port
-
-    // ignore key releases
-    if (scancode & 0x80) {
-      scancode &= 0x7F;
-      if (scancode == 0x2A || scancode == 0x36)
-        shift = false;
-    } else {
-      if (scancode == 0x2A || scancode == 0x36) {
-        shift = true;
-
-        continue;
-      }
-
-      char c = translate_scancode_set_1(scancode, shift);
-
-      if (c == '\n') {
-        print_char(c);
-
-        mk_handle_cmd((char *)&cmd_buf);
-        _memset(&cmd_buf, 0, sizeof(cmd_buf));
-        cmd_pos = 0;
-
-        print_str("$ ");
-        
-        continue;
-      }
-
-      if (cmd_pos == 255) {
-        continue;
-      }
-
-      cmd_buf[cmd_pos++] = c;
-      print_char(c);
-    }
-
-  }
-}
-
-/*
 void mk_keyboard_int_handler() {
   mk_sema_give(keyboard_sema);
   mk_pic_send_eoi(1);
 }
-*/
 
-void mk_keyboard_int_handler() {
-    // status register bit 1 = output  buffer status
-    if ((inb(0x64) & 1) == 0)
-        return;
-    
-    uint8_t scancode = inb(0x60); // read the data port
-    
-    // ignore key releases
-    if (scancode & 0x80) {
-        scancode &= 0x7F;
-        if (scancode == 0x2A || scancode == 0x36)
-            shift = false;
-    }
-    else {
-        if (scancode == 0x2A || scancode == 0x36) {
-            shift = true;
-            mk_pic_send_eoi(1);
-
-            return;
-        }
-        
-        char c = translate_scancode_set_1(scancode, shift);
-        
-        if (c == '\n') {
-            print_char(c);
-
-            mk_handle_cmd((char *) &cmd_buf);
-            _memset(&cmd_buf, 0, sizeof(cmd_buf));
-            cmd_pos = 0;
-
-            print_str("$ ");
-            mk_pic_send_eoi(1);
-
-            return;
-        }
-
-        if (cmd_pos == 255) {
-            mk_pic_send_eoi(1);
-
-            return;
-        }
-
-        cmd_buf[cmd_pos++] = c;
-        print_char(c);
-    }
-
-    mk_pic_send_eoi(1);
-}

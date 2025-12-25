@@ -4,7 +4,7 @@
 #include "context.h"
 
 #define MAX_THREAD_PRIO 0x10
-#define THREAD_TIME_SLICE 10
+#define THREAD_TIME_SLICE 3
 
 enum ThreadState {
     MK_THREAD_KILLED,
@@ -15,20 +15,6 @@ enum ThreadState {
     MK_THREAD_ZOMBIE
 };
 
-/*
-struct mk_thread_obj {
-    enum ThreadState state;
-    struct regs_context regs;
-
-    uint8_t started;
-    uint32_t time_slice;
-
-    void* entry;
-
-    uint8_t* stack_base;
-};
-*/
-
 struct mk_thread_obj {
     char* thread_name;
 
@@ -36,7 +22,6 @@ struct mk_thread_obj {
     struct regs_context regs;
 
     uint8_t started;
-    // uint8_t prio;
     uint32_t time_slice;
 
     void* entry;
@@ -45,8 +30,6 @@ struct mk_thread_obj {
 
     struct mk_thread_obj* next;
     struct mk_thread_obj* prev;
-    
-    // struct mk_thread_obj* sema_next;
 };
 
 struct mk_sema_t {

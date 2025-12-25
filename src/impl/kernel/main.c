@@ -9,6 +9,7 @@
 #include "isr.h"
 #include "pic.h"
 #include "thread.h"
+#include "drivers.h"
 
 #include <stdint.h>
 
@@ -76,11 +77,11 @@ void idle_thread() {
 
 void initialize_tasks() {
   mk_thread_create(&idle_thread, "idle_task");
-  // mk_thread_create(&mk_keyboard, "keyboard_task");
+  mk_thread_create(&mk_ps2_keyboard_driver, "ps2_keyboard_task");
   
   mk_create_sema(&sema, 0);
-  //mk_thread_create(&alice, "alice");
-  //mk_thread_create(&bob, "bob");
+  mk_thread_create(&alice, "alice");
+  mk_thread_create(&bob, "bob");
 }
 
 void kernel_main() {
@@ -93,8 +94,6 @@ void kernel_main() {
   reg_cmds();
   initialize_tasks();
 
-  print_qword((uint64_t) sizeof(struct mk_slab_t));
-  
   start_keyboard();
   start_timer();
 

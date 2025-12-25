@@ -4,6 +4,8 @@
 #include "inlines.c"
 #include "virt.h"
 #include "slab.h"
+#include "pic.h"
+
 #include <stdint.h>
 
 #define THREAD_DEBUG 0
@@ -86,6 +88,7 @@ void mk_thread_create(void* entry, char* thread_name) {
 }
 
 void mk_thread_kill() {
+
     disable_interrupts();
     
     if (THREAD_DEBUG) {
@@ -129,9 +132,6 @@ int mk_thread_ctx_switch() {
 	      print_str(working_thread->thread_name);
 	      print_str(" thread free'd\n");
 	}
-
-	disable_interrupts();
-	mk_thread_idle();
     }
 
     struct mk_thread_obj* cur = working_thread;

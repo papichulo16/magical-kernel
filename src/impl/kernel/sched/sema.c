@@ -22,6 +22,7 @@ void mk_sema_enq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
 
 void mk_sema_deq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
     sema->head = t->next;
+
     if (sema->head == 0)
         sema->tail = 0;
 
@@ -29,14 +30,13 @@ void mk_sema_deq(struct mk_sema_t* sema, struct mk_thread_obj* t) {
 }
 
 void mk_create_sema(void** dst, int start) {
-    print_str("allocating sema\n");
     struct mk_sema_t* p = mkmalloc(sizeof(struct mk_sema_t));
 
-    //p->state = start;
-    //p->head = 0;
-    //p->tail = 0;
+    p->state = start;
+    p->head = 0;
+    p->tail = 0;
 
-    //*(struct mk_sema_t **) dst = p;
+    *(struct mk_sema_t **) dst = p;
 }
 
 void mk_sema_give(struct mk_sema_t* sema) {
@@ -47,8 +47,12 @@ void mk_sema_give(struct mk_sema_t* sema) {
     if (t == 0)
         return;
 
+    disable_interrupts();
+
     t->state = MK_THREAD_READY;
     mk_sema_deq(sema, t);
+
+    enable_interrupts();
 
     if (SEMA_DEBUG) {
         print_str("[*] sema.c: woken thread ");

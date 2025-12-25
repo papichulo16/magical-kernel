@@ -50,15 +50,22 @@ uint64_t* get_l3_table(uint64_t p) {
     return (uint64_t *) (cr3[idx] & ~0xfff);
 }
 
-void alloc_l3_table(uint64_t p) {
+// returns ptr used to get to the table, not table addr
+uint64_t alloc_l3_table(uint64_t p) {
     uint64_t* cr3 = get_cr3();
     uint64_t idx = L4_INDEX(p);
+
+    // check for huge pages
+    if ((cr3[idx] & (1 << 7)) != 0)
+        return alloc_l3_table(p + (1 << 39));
     
     if (cr3[idx] != 0) 
-        return;
+        return p;
 
     cr3[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
     _memset((void *) (cr3[idx] & ~0xfff), 0, PAGE_SIZE);
+
+    return p;
 }
 
 uint64_t* get_l2_table(uint64_t p) {
@@ -71,15 +78,24 @@ uint64_t* get_l2_table(uint64_t p) {
     return (uint64_t *) (l3[idx] & ~0xfff);
 }
 
-void alloc_l2_table(uint64_t p) {
+// returns ptr used to get to the table, not table addr
+uint64_t alloc_l2_table(uint64_t p) {
+    p = alloc_l3_table(p);
+
     uint64_t* l3 = get_l3_table(p);
     uint64_t idx = L3_INDEX(p);
     
+    // check for huge pages
+    if((l3[idx] & (1 << 7)) != 0)
+	return alloc_l2_table(p + (1 << 30));
+
     if (l3[idx] != 0) 
-        return;
+        return p;
 
     l3[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
     _memset((void *) (l3[idx] & ~0xfff), 0, PAGE_SIZE);
+
+    return p;
 }
 
 uint64_t* get_l1_table(uint64_t p) {
@@ -92,17 +108,25 @@ uint64_t* get_l1_table(uint64_t p) {
     return (uint64_t *) (l2[idx] & ~0xfff);
 }
 
-void alloc_l1_table(uint64_t p) {
+// returns ptr used to get to the table, not table addr
+uint64_t alloc_l1_table(uint64_t p) {
+    p = alloc_l2_table(p);
+
     uint64_t* l2 = get_l2_table(p);
     uint64_t idx = L2_INDEX(p);
     
+    // check for huge pages
+    if ((l2[idx] & (1 << 7)) != 0)
+	return alloc_l1_table(p + (1 << 21));
+
     if (l2[idx] != 0) 
-        return;
+        return p;
 
     l2[idx] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
     _memset((void *) (l2[idx] & ~0xfff), 0, PAGE_SIZE);
-}
 
+    return p;
+}
 
 uint64_t* get_l1_idx(uint64_t p) {
     uint64_t* l1 = get_l1_table(p);
@@ -117,12 +141,8 @@ uint64_t* get_l1_idx(uint64_t p) {
 uint8_t* kern_get_next_free_l1_addr(uint8_t* p){
     
     // they wont allocate if the index already exists
-    alloc_l3_table((uint64_t) p);
-    alloc_l2_table((uint64_t) p);
-    alloc_l1_table((uint64_t) p);
-    
-    uint64_t* l1 = get_l1_table((uint64_t) p);
-    
+    p = alloc_l1_table((uint64_t) p);
+
     for (; L1_INDEX((uint64_t) p) < 512; p += (1 << 12)) {
         if (get_l1_idx((uint64_t) p) == 0)
             return p;

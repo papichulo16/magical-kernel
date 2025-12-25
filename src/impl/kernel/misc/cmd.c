@@ -25,7 +25,7 @@ void cmd_help() {
     while (cur != 0) {
         if (!cur->list) {
 
-            //cur = cur->next;
+            cur = cur->next;
             continue;
 	}
 

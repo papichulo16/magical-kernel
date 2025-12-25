@@ -1,4 +1,7 @@
-#include "isr.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "drivers.h"
 
 // thanks chatgpt
 char scancode_set1_unshifted[256] = {
