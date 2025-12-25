@@ -1,6 +1,7 @@
 #include "virt.h"
 #include "page.h"
 #include "mklib.h"
+#include "print.h"
 
 #include <stdint.h>
 
@@ -31,6 +32,7 @@ Bits 9-11: Available       - OS can use for whatever
 
 uint64_t KERNEL_SIZE;
 uint64_t KERNEL_DATA_VMA;
+uint64_t KERNEL_TABLES_VMA;
 
 uint64_t* get_cr3() {
     uint64_t* cr3;
@@ -43,7 +45,24 @@ void* phys_to_kern_virt(uint8_t* paddr) {
     return (uint64_t) KERNEL_VMA + paddr;
 }
 
+void* g_ptable_vaddr_l1(uint8_t* paddr) {
+    uint8_t** l1_tbl = (uint8_t **) KERNEL_TABLES_VMA;
+
+    for (int i = 0; i < 512; i++) {
+	if (((uint64_t) l1_tbl[i] & ~0xfff) == ((uint64_t) paddr & ~0xfff)) {
+
+	    return l1_tbl + (i << 12);
+	}
+    }
+
+    print_error("[*] virt.c: page table not found! either space ran out or wrong paddr!\n");
+    while (1);
+
+    return 0;
+}
+
 uint64_t* get_l3_table(uint64_t p) {
+    //uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
     uint64_t* cr3 = get_cr3();
     uint64_t idx = L4_INDEX(p);
     
@@ -52,6 +71,7 @@ uint64_t* get_l3_table(uint64_t p) {
 
 // returns ptr used to get to the table, not table addr
 uint64_t alloc_l3_table(uint64_t p) {
+    //uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
     uint64_t* cr3 = get_cr3();
     uint64_t idx = L4_INDEX(p);
 
@@ -201,5 +221,12 @@ void mk_virt_init() {
     */
     
     KERNEL_SIZE = (((uint64_t) KERNEL_VIRT_END - (uint64_t) KERNEL_VIRT_START) & ~0xfff) + 0x1000;
-    KERNEL_DATA_VMA = (uint64_t) KERNEL_VMA + (uint64_t) KERNEL_SIZE;
+
+    if (KERNEL_SIZE > RESB_KERN_SIZE) {
+	print_error("[*] virt.c: kernel size is larger than reserved size\n");
+	while(1);
+    }
+
+    KERNEL_DATA_VMA = (uint64_t) KERNEL_VMA + (uint64_t) RESB_KERN_SIZE;
+    KERNEL_TABLES_VMA = 0xffffffff40000000;
 }

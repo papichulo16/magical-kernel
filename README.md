@@ -1,5 +1,5 @@
-# Magical Kernel 
-## The most magical kernel of all
+# Kat Kernel 
+## The cat oriented kernel you wish existed sooner!!11!
 
 ### features
 
@@ -15,8 +15,8 @@ right now the working features are as follows:
 
 ### goal
 
-the goal is to have working IO, separate kernel/user space, and a file system.......
-I am pretty busy and lazy so this will be a VERY slow process, but we will see how it goes.
+the goal is to have working IO, separate kernel/user space, a file system, and DOOM running.......
+I am pretty busy so this will be a VERY slow process, but we will see how it goes.
 
 ### building
 

@@ -106,7 +106,42 @@ setup_page_tables:
   or eax, 0b11 ; present, writeable flags
   mov [page_table_l3 + 510 * 8], eax
 
+setup_tables_tables:
+  ; this is a separate table entry that will hold all page tables to be able to use in virtual memory
+  mov eax, _page_table_l2
+  or eax, 0b11 ; present, writeable flags
+  mov [page_table_l3 + 509 * 8], eax
 
+  mov eax, _page_table_l1
+  or eax, 0b11 ; present, writeable flags
+  mov [_page_table_l2], eax
+
+  ; now fill in some values for the tables we are starting off using
+  ; STRUCTURE: 
+  ; [0]: itself
+  ; [1]: parent
+  ; [2-511]: other tables
+  mov eax, page_table_l4
+  or eax, 0b11 ; present, writeable flags
+  mov [_page_table_l1 + 2 * 8], eax
+
+  mov eax, page_table_l3
+  or eax, 0b11 ; present, writeable flags
+  mov [_page_table_l1 + 3 * 8], eax
+
+  mov eax, page_table_l2
+  or eax, 0b11 ; present, writeable flags
+  mov [_page_table_l1 + 4 * 8], eax
+
+  mov eax, _page_table_l2
+  or eax, 0b11 ; present, writeable flags
+  mov [_page_table_l1 + 1 * 8], eax
+
+  mov eax, _page_table_l1
+  or eax, 0b11 ; present, writeable flags
+  mov [_page_table_l1 + 0 * 8], eax
+
+  ; fill the reserved space for the kernel
   mov ecx, 0
 
 .fill_loop:
@@ -121,7 +156,7 @@ setup_page_tables:
   ; cmp ecx, 16
 
   ; map out more cuz who cares
-  cmp ecx, 512
+  cmp ecx, 32
   jne .fill_loop
   
   ret
@@ -173,7 +208,11 @@ page_table_l3:
   resb 0x1000
 page_table_l2:
   resb 0x1000
-page_table_l1:
+
+; page tables that hold page tables setup
+_page_table_l2:
+  resb 0x1000
+_page_table_l1:
   resb 0x1000
 
 ; reserve memory space for the stack

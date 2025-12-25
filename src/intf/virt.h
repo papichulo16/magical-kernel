@@ -8,6 +8,7 @@ extern uint8_t KERNEL_VIRT_END[];
 extern uint8_t KERNEL_VMA[];
 
 extern uint64_t KERNEL_SIZE;
+extern uint64_t KERNEL_TABLES_VMA;
 extern uint64_t KERNEL_DATA_VMA;
 
 uint8_t* mk_vmmap_l1(uint8_t flags);

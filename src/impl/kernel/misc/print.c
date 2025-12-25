@@ -172,11 +172,11 @@ void print_menu() {
     print_str(" |_ _  |.--.) )\n");
     print_str(" ( T   )     /\n");
     print_str("(((^_(((/(((_/\n");
-    print_str("Welcome to Magical Kernel Ultra!\n");
-    print_str("This is a work in progress, I am pretty busy and lazy so this will be shit and slow paced... but hopefully I get something done!\n\n");
+    print_str("Welcome to the Kat Kernel!\n");
+    print_str("Check out the blogs I have written for this in www.luisabraham.xyz! This is a fun little hobby kernel I work on in my free time.\n\n");
 
     print_set_color(PRINT_COLOR_BLACK, PRINT_COLOR_LIGHT_GREEN);
-    print_str("Author: papichulo\n");
+    print_str("Author: Luis Abraham\n");
     print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_BLACK);
     
     for (int i = 0; i < NUM_COLS; i++)
