@@ -16,9 +16,13 @@ uint8_t cmd_pos = 0;
 
 void mk_ps2_keyboard_driver() {
 
-  mk_create_sema(&keyboard_sema, -1);
+  mk_create_sema(&keyboard_sema, 0);
 
   while (1) {
+
+    // for now keep the thread going, everything is slow so it will be buggy
+    //mk_sema_take(keyboard_sema);
+
     // status register bit 1 = output  buffer status
     if ((inb(0x64) & 1) == 0)
       continue;

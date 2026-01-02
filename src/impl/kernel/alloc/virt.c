@@ -68,7 +68,7 @@ void* c_page_tbl() {
 	if (l1_tbl[i] == 0) {
 	    void* page = mk_phys_page_alloc();
 
-    	    l1_tbl[i] = (uint64_t) page | PRESENT | WRITE;
+    	    l1_tbl[i] = (uint8_t *)((uint64_t) page | PRESENT | WRITE);
 
 	    return page;
 	}
@@ -94,7 +94,7 @@ uint64_t alloc_l3_table(uint64_t p) {
 
     // check for huge pages
     if ((cr3[idx] & (1 << 7)) != 0)
-        return alloc_l3_table(p + (1 << 39));
+        return alloc_l3_table(p + (1ULL << 39));
     
     if (cr3[idx] != 0) 
         return p;
@@ -136,7 +136,7 @@ uint64_t alloc_l2_table(uint64_t p) {
 }
 
 uint64_t* get_l1_table(uint64_t p) {
-    uint64_t* l2 = g_ptable_vaddr_l1((uint8_t *)get_l2_table(p));
+    uint64_t* l2 = g_ptable_vaddr_l1((uint8_t *) get_l2_table(p));
     uint64_t idx = L2_INDEX(p);
 
     if (!l2)
@@ -178,7 +178,7 @@ uint64_t* get_l1_idx(uint64_t p) {
 uint8_t* kern_get_next_free_l1_addr(uint8_t* p){
     
     // they wont allocate if the index already exists
-    p = alloc_l1_table((uint64_t) p);
+    p = (uint8_t *) alloc_l1_table((uint64_t) p);
 
     for (; L1_INDEX((uint64_t) p) < 512; p += (1 << 12)) {
         if (get_l1_idx((uint64_t) p) == 0)
@@ -193,7 +193,7 @@ int map_l1(uint64_t p) {
     if (get_l1_idx(p))
         return -1;
     
-    uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *)get_l1_table(p));
+    uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *) get_l1_table(p));
     l1[L1_INDEX(p)] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
 
     return 0;
@@ -208,8 +208,8 @@ uint8_t* mk_vmmap_l1(uint8_t flags) {
     return 0;
 }
 
-void mk_unmmap_l1(uint8_t *vaddr) {
-    uint64_t** l1 = g_ptable_vaddr_l1((uint8_t *)get_l1_table(vaddr));
+void mk_unmmap_l1(uint8_t* vaddr) {
+    uint64_t** l1 = g_ptable_vaddr_l1((uint8_t *) get_l1_table((uint64_t) vaddr));
     
     if (l1 == 0)
         return;

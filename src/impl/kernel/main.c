@@ -13,8 +13,6 @@
 
 #include <stdint.h>
 
-void* sema;
-
 void initial_checks() {
   if (!are_interrupts_enabled())
     print_error("[!] ERR: Interrupts are not enabled\n");
@@ -26,8 +24,11 @@ void initial_checks() {
 void sys_init() {
   mk_page_alloc_init();
   mk_virt_init();
+
   mk_idt_init();
+
   mk_pic_init();
+  mk_ahci_init();
 }
 
 void start_keyboard() {
@@ -44,32 +45,10 @@ void start_timer() {
     print_error("[!] ERR: Timer IRQ is masked\n");
 }
 
-void test(char* s) {
-  print_str(s);
-  print_char('\n');
-}
-
 void reg_cmds() {
   mk_register_cmd("help", "list all cmds", &cmd_help, 1);
   mk_register_cmd("clear", "clear screen", &print_user_clear, 1);
 }
-
-void alice() {
-  mk_sema_take(sema); 
-
-  print_str("this should print after\n");
-  
-  mk_thread_kill();
-}
-
-void bob() {
-  print_str("this should print before\n");
-  
-  mk_sema_give(sema);
-
-  mk_thread_kill();
-}
-
 
 void idle_thread() {
   while(1);
@@ -78,13 +57,10 @@ void idle_thread() {
 void initialize_tasks() {
   mk_thread_create(&idle_thread, "idle_task");
   mk_thread_create(&mk_ps2_keyboard_driver, "ps2_keyboard_task");
-  
-  mk_create_sema(&sema, 0);
-  mk_thread_create(&alice, "alice");
-  mk_thread_create(&bob, "bob");
 }
 
 void kernel_main() {
+
   print_clear();
   print_menu();
 

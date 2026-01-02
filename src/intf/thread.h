@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include "context.h"
 
-#define MAX_THREAD_PRIO 0x10
 #define THREAD_TIME_SLICE 3
 
 enum ThreadState {
