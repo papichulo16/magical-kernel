@@ -20,9 +20,12 @@ Bits 9-11: Available       - OS can use for whatever
 
 */
 
+#define MMIO_BASE_VMA 0xffffff8000000000UL
+
 #define PRESENT 1
 #define WRITE 1 << 1
 #define USER 1 << 2
+#define PCD 1 << 4
 #define HUGE 1 << 7
 
 #define L4_INDEX(va)   (((va) >> 39) & 0x1ff)
@@ -43,6 +46,11 @@ uint64_t* get_cr3() {
 
 void* phys_to_kern_virt(uint8_t* paddr) {
     return (uint64_t) KERNEL_VMA + paddr;
+}
+
+uint64_t mk_phys_to_mmio_virt(uint8_t* paddr) {
+    uint64_t vaddr = (uint64_t) MMIO_BASE_VMA + paddr;
+    return vaddr;
 }
 
 void* g_ptable_vaddr_l1(uint8_t* paddr) {

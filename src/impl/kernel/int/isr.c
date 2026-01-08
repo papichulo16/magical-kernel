@@ -8,7 +8,7 @@
 #include "thread.h"
 #include "slab.h"
 #include "virt.h"
-#include "drivers.h"
+#include "drivers/ps2.h"
 
 #include <stdint.h>
 

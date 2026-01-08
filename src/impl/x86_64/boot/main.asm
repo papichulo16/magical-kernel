@@ -93,7 +93,6 @@ setup_page_tables:
   or eax, 0b11 ; present, writeable flags
   mov [page_table_l4], eax
 
-  ; just playign aroung with the MMU, hopefully i remmeber to delete
   mov eax, page_table_l3
   or eax, 0b11 ; present, writeable flags
   mov [page_table_l4 + 511 * 8], eax
@@ -105,6 +104,19 @@ setup_page_tables:
   mov eax, page_table_l2
   or eax, 0b11 ; present, writeable flags
   mov [page_table_l3 + 510 * 8], eax
+
+map_mmio_vmem:
+  mov eax, 0x40000000
+  or eax, 0b10011011 ; present, writeable, cache disable, write-through, huge page flags
+  mov [page_table_l3 + 1 * 8], eax
+  
+  mov eax, 0x80000000
+  or eax, 0b10011011 ; present, writeable, cache disable, write-through, huge page flags
+  mov [page_table_l3 + 2 * 8], eax
+
+  mov eax, 0xc0000000
+  or eax, 0b10011011 ; present, writeable, cache disable, write-through, huge page flags
+  mov [page_table_l3 + 3 * 8], eax
 
 setup_tables_tables:
   ; this is a separate table entry that will hold all page tables to be able to use in virtual memory
@@ -234,6 +246,7 @@ gdt64:
   ; 0x10: kernel data segment descriptor
   ; type=data (0x2), S=1, P=1, no 64-bit flag
   dq (1 << 41) | (1 << 44) | (1 << 47)
+
 .pointer:
   ; size
   dw $ - gdt64 - 1

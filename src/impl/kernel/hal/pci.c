@@ -28,7 +28,6 @@ uint32_t pci_enum_device(uint16_t vendor, uint16_t device) {
 	}
 
 	return (uint32_t) ~0;
-			
 }
 
 uint32_t pci_config_read_dword(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {

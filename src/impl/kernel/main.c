@@ -9,7 +9,8 @@
 #include "isr.h"
 #include "pic.h"
 #include "thread.h"
-#include "drivers.h"
+#include "drivers/ps2.h"
+#include "drivers/ahci.h"
 
 #include <stdint.h>
 
