@@ -3,4 +3,4 @@ build/x86_64/
 build/kernel/
 .cache/
 compile_commands.json
-.gdbhistory
+.gdb_history

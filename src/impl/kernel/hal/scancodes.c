@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "drivers.h"
+#include "drivers/ps2.h"
 
 // thanks chatgpt
 char scancode_set1_unshifted[256] = {

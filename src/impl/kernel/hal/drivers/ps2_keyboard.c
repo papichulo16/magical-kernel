@@ -3,7 +3,7 @@
 
 #include "print.h"
 #include "thread.h"
-#include "drivers.h"
+#include "drivers/ps2.h"
 #include "cmd.h"
 #include "mklib.h"
 #include "inlines.c"

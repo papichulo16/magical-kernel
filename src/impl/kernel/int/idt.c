@@ -33,7 +33,6 @@ void mk_idt_init() {
     mk_idt_set_descriptor(0x20, &mk_asm_timer_int, 0x8E);
     mk_idt_set_descriptor(0x21, &mk_asm_keyboard_int, 0x8E);
     
-
     // set the IDTR
     __asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
 

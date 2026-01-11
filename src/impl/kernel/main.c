@@ -24,9 +24,9 @@ void initial_checks() {
 
 void sys_init() {
   mk_page_alloc_init();
-  mk_virt_init();
-
   mk_idt_init();
+
+  mk_virt_init();
 
   mk_pic_init();
   mk_ahci_init();
