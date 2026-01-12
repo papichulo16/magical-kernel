@@ -4,3 +4,4 @@ build/kernel/
 .cache/
 compile_commands.json
 .gdb_history
+disk.img
