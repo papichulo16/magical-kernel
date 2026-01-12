@@ -99,6 +99,44 @@ struct ahci_rw_port_t* mk_g_ahci_head() {
   return ahci_rw_head;
 }
 
+#define HBA_PxCMD_ST    0x0001
+#define HBA_PxCMD_FRE   0x0010
+#define HBA_PxCMD_FR    0x4000
+#define HBA_PxCMD_CR    0x8000
+
+// Start command engine
+void start_cmd(struct ahci_port_t *port)
+{
+	// Wait until CR (bit15) is cleared
+	while (port->cmd & HBA_PxCMD_CR)
+		;
+
+	// Set FRE (bit4) and ST (bit0)
+	port->cmd |= HBA_PxCMD_FRE;
+	port->cmd |= HBA_PxCMD_ST; 
+}
+
+// Stop command engine
+void stop_cmd(struct ahci_port_t *port)
+{
+	// Clear ST (bit0)
+	port->cmd &= ~HBA_PxCMD_ST;
+
+	// Clear FRE (bit4)
+	port->cmd &= ~HBA_PxCMD_FRE;
+
+	// Wait until FR (bit14), CR (bit15) are cleared
+	while(1)
+	{
+		if (port->cmd & HBA_PxCMD_FR)
+			continue;
+		if (port->cmd & HBA_PxCMD_CR)
+			continue;
+		break;
+	}
+
+}
+
 struct ahci_rw_port_t* ahci_port_push(struct ahci_port_t* port) {
   struct ahci_rw_port_t* ahci_rw = mkmalloc(sizeof(struct ahci_rw_port_t));
 
@@ -120,8 +158,12 @@ struct ahci_rw_port_t* ahci_port_push(struct ahci_port_t* port) {
     void* paddr = mk_g_paddr(vaddr);
 
     ahci_rw->ctb[i] = vaddr;
+    
+    ahci_rw->clb[i].prdtl = 8;
     ahci_rw->clb[i].ctba = (uint64_t) paddr & 0xFFFFFFFF;
     ahci_rw->clb[i].ctbau = ((uint64_t) paddr >> 32) & 0xFFFFFFFF;
+
+    _memset(vaddr, 0, 256);
   }
 
   ahci_rw->port = port;
@@ -133,6 +175,8 @@ struct ahci_rw_port_t* ahci_port_push(struct ahci_port_t* port) {
 }
 
 void ahci_port_init(struct ahci_port_t* port) {
+  stop_cmd(port);
+
   struct ahci_rw_port_t* rw_p = ahci_port_push(port);
 
   void* paddr_clb = mk_g_paddr(rw_p->clb);
@@ -143,8 +187,7 @@ void ahci_port_init(struct ahci_port_t* port) {
   port->fb = (uint32_t) ((uint64_t) paddr_fisb & 0xffffffff);
   port->fbu = (uint32_t) (((uint64_t) paddr_fisb >> 32) & 0xffffffff);
 
-  port->cmd |= (1 << 4);  // fis recv enable 
-  port->cmd |= (1 << 0);  // start
+  start_cmd(port);
 }
 
 int mk_ahci_init() {
@@ -165,8 +208,8 @@ int mk_ahci_init() {
     if (detection != 3 || power != 1)
       continue;
 
-    // SATAPI
-    if (mmio->ports[i].sig != 0xeb140101)
+    // SATA
+    if (mmio->ports[i].sig != 0x0101)
       continue;
 
     ahci_port_init(&mmio->ports[i]);
@@ -229,7 +272,7 @@ int mk_ahci_read(struct ahci_rw_port_t *port, uint64_t lba, uint32_t count, void
     cmd_header->p = 0;     // Not prefetchable
     
     // Set up PRDT entry
-    uintptr_t buffer_phys = mk_g_paddr(buffer);
+    uintptr_t buffer_phys = _mk_g_paddr(buffer);
     cmd_table->prdt_entry[0].dba = buffer_phys & 0xFFFFFFFF;
     cmd_table->prdt_entry[0].dbau = (buffer_phys >> 32) & 0xFFFFFFFF;
     cmd_table->prdt_entry[0].dbc = (count * 512) - 1;  // Byte count (0-based)
@@ -300,7 +343,7 @@ int mk_ahci_write(struct ahci_rw_port_t *port, uint64_t lba, uint32_t count, con
     cmd_header->p = 0;     // Not prefetchable
     
     // Set up PRDT entry
-    uintptr_t buffer_phys = mk_g_paddr((void*)buffer);
+    uintptr_t buffer_phys = _mk_g_paddr((void*)buffer);
     cmd_table->prdt_entry[0].dba = buffer_phys & 0xFFFFFFFF;
     cmd_table->prdt_entry[0].dbau = (buffer_phys >> 32) & 0xFFFFFFFF;
     cmd_table->prdt_entry[0].dbc = (count * 512) - 1;  // Byte count (0-based)

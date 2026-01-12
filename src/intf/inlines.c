@@ -1,6 +1,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+static inline void cache_flush_all(void)
+{
+    asm volatile("wbinvd" ::: "memory");
+}
+
 static inline void enable_interrupts(void) {
     __asm__ volatile ("sti" ::: "memory");
 }

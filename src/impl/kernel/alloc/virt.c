@@ -183,7 +183,6 @@ uint64_t* get_l1_idx(uint64_t p) {
     return (uint64_t *) (l1[idx] & ~0xfff);
 }
 
-/*
 void* mk_g_paddr(void* vaddr) {
     uint64_t p = ((uint64_t) vaddr) & ~0xfff;
     uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *) get_l1_table(p));
@@ -194,10 +193,11 @@ void* mk_g_paddr(void* vaddr) {
 
     return (l1[idx] & ~0xfff) + (((uint64_t) vaddr) & 0xfff);
 }
-*/
-void* mk_g_paddr(void* vaddr) {
+
+void* _mk_g_paddr(void* vaddr) {
   return vaddr - 0xffffffff80000000ULL;
 }
+
 uint8_t* kern_get_next_free_l1_addr(uint8_t* p) {
     
     // they wont allocate if the index already exists

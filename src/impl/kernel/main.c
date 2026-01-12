@@ -57,21 +57,23 @@ void idle_thread() {
   while(1);
 }
 
-char wbuf[512];
-char rbuf[512];
+char wbuf[512] __attribute((aligned(16)));
+char rbuf[512] __attribute((aligned(16)));
 
 void disk_rw_test() {
   int c = 512;
   //char* wbuf = mkmalloc(c);
   //char* rbuf = mkmalloc(c);
 
-  print_qword(wbuf); print_char(' '); print_qword(mk_g_paddr(wbuf));
-
   for (int i = 0; i < c; i++) {
     wbuf[i] = 'A';
   }
 
+  print_str("hello");
+
   struct ahci_rw_port_t* port = mk_g_ahci_head();
+
+  cache_flush_all();
 
   if (!mk_ahci_write(port, 100, 1, wbuf)) {
     print_error("write fail\n");
@@ -84,6 +86,8 @@ void disk_rw_test() {
 
     while(1);
   }
+
+  cache_flush_all();
 
   print_str("buf: ");
   print_str(rbuf);
