@@ -8,6 +8,7 @@
 #include "idt.h"
 #include "isr.h"
 #include "pic.h"
+#include "pci.h"
 #include "thread.h"
 #include "drivers/ps2.h"
 #include "drivers/ahci.h"
@@ -24,11 +25,12 @@ void initial_checks() {
 
 void sys_init() {
   mk_page_alloc_init();
+
+  mk_pic_init(); // make sure pic is initialized before setting up idt
   mk_idt_init();
 
   mk_virt_init();
 
-  mk_pic_init();
   mk_ahci_init();
 }
 
@@ -55,9 +57,45 @@ void idle_thread() {
   while(1);
 }
 
+char wbuf[512];
+char rbuf[512];
+
+void disk_rw_test() {
+  int c = 512;
+  //char* wbuf = mkmalloc(c);
+  //char* rbuf = mkmalloc(c);
+
+  print_qword(wbuf); print_char(' '); print_qword(mk_g_paddr(wbuf));
+
+  for (int i = 0; i < c; i++) {
+    wbuf[i] = 'A';
+  }
+
+  struct ahci_rw_port_t* port = mk_g_ahci_head();
+
+  if (!mk_ahci_write(port, 100, 1, wbuf)) {
+    print_error("write fail\n");
+
+    while(1);
+  }
+  
+  if (!mk_ahci_read(port, 100, 1, rbuf)) {
+    print_error("read fail\n");
+
+    while(1);
+  }
+
+  print_str("buf: ");
+  print_str(rbuf);
+
+  mk_thread_kill();
+}
+
 void initialize_tasks() {
   mk_thread_create(&idle_thread, "idle_task");
   mk_thread_create(&mk_ps2_keyboard_driver, "ps2_keyboard_task");
+
+  mk_thread_create(&disk_rw_test, "disk_rw_test");
 }
 
 void kernel_main() {

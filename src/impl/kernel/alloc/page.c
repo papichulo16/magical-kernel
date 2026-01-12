@@ -60,9 +60,9 @@ void mk_page_alloc_init() {
     
     // mark every page as used
     for (uint64_t i = 0; i < NUM_PAGES; i++) {
-	// skip extended RAM, unless used by kernel
-	if (i > RESB_KERN_PAGES && i < RESB_RAM_PAGES)
-		continue;
+      // skip extended RAM, unless used by kernel
+      if (i > RESB_KERN_PAGES && i < RESB_RAM_PAGES)
+        continue;
 
         set_bit(i);
     }

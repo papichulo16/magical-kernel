@@ -13,6 +13,8 @@ extern uint64_t KERNEL_DATA_VMA;
 
 uint64_t mk_phys_to_mmio_virt(uint8_t* paddr);
 
+void* mk_g_paddr(void* vaddr);
+
 uint8_t* mk_vmmap_l1(uint8_t flags);
 // uint8_t* mk_vmmap_l2(uint8_t flags);
 

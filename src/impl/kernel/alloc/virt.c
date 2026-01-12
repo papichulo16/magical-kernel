@@ -174,7 +174,7 @@ uint64_t alloc_l1_table(uint64_t p) {
 }
 
 uint64_t* get_l1_idx(uint64_t p) {
-    uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *)get_l1_table(p));
+    uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *) get_l1_table(p));
     uint64_t idx = L1_INDEX(p);
 
     if (!l1)
@@ -183,7 +183,22 @@ uint64_t* get_l1_idx(uint64_t p) {
     return (uint64_t *) (l1[idx] & ~0xfff);
 }
 
-uint8_t* kern_get_next_free_l1_addr(uint8_t* p){
+/*
+void* mk_g_paddr(void* vaddr) {
+    uint64_t p = ((uint64_t) vaddr) & ~0xfff;
+    uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *) get_l1_table(p));
+    uint64_t idx = L1_INDEX(p);
+
+    if (!l1)
+        return 0;
+
+    return (l1[idx] & ~0xfff) + (((uint64_t) vaddr) & 0xfff);
+}
+*/
+void* mk_g_paddr(void* vaddr) {
+  return vaddr - 0xffffffff80000000ULL;
+}
+uint8_t* kern_get_next_free_l1_addr(uint8_t* p) {
     
     // they wont allocate if the index already exists
     p = (uint8_t *) alloc_l1_table((uint64_t) p);
@@ -194,7 +209,7 @@ uint8_t* kern_get_next_free_l1_addr(uint8_t* p){
     }
 
     // try again with a new l1 table index
-    return kern_get_next_free_l1_addr(p + (1 << 12));
+    return kern_get_next_free_l1_addr(p + (1 << 21));
 }
 
 int map_l1(uint64_t p) {
@@ -202,7 +217,9 @@ int map_l1(uint64_t p) {
         return -1;
     
     uint64_t* l1 = g_ptable_vaddr_l1((uint8_t *) get_l1_table(p));
-    l1[L1_INDEX(p)] = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
+    uint8_t* paddr = (uint64_t) mk_phys_page_alloc() | PRESENT | WRITE;
+
+    l1[L1_INDEX(p)] = paddr;
 
     return 0;
 }
@@ -245,6 +262,6 @@ void mk_virt_init() {
     uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
     uint64_t* l3_table = (uint64_t *) ((uint64_t) g_ptable_vaddr_l1((uint8_t *) cr3[0]) & ~0xfff);
     
-    l3_table[0] = 0;
-    cr3[0] = 0;
+    //l3_table[0] = 0;
+    //cr3[0] = 0;
 }

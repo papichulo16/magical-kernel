@@ -80,5 +80,5 @@ void mk_pit_init(uint32_t frequency) {
 void mk_pic_init() {
     mk_pic_remap(0x20,0x28);
     
-    __asm__ volatile ("sti"); // set the interrupt flag
+    //__asm__ volatile ("sti"); // set the interrupt flag
 }

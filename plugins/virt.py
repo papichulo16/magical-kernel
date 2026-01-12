@@ -5,6 +5,9 @@ class WalkPageTable(gdb.Command):
     
     def __init__(self):
         super(WalkPageTable, self).__init__("pagewalk", gdb.COMMAND_USER)
+
+    
+            
     
     def invoke(self, arg, from_tty):
         if not arg:
@@ -58,9 +61,24 @@ class WalkPageTable(gdb.Command):
             COLOR_CYAN = "\033[96m"
             
             inferior = gdb.selected_inferior()
-            
+
+            def g_table_vaddr(paddr):
+                    base = 0xffffffff40000000
+                    addr = 0xffffffff40000000
+
+                    for i in range(512):
+                        b = inferior.read_memory(addr, 8)
+                        p = int.from_bytes(b, "little") & ~0xfff
+
+                        if p == (paddr & ~0xfff):
+                            return base + (i << 12)
+
+                        addr += 8
+
+                    return 0
+                        
             # Step 1: Read PML4 Entry
-            pml4_entry_addr = pml4_base + (pml4_index * 8)
+            pml4_entry_addr = g_table_vaddr(pml4_base) + (pml4_index * 8)
             print(f"\n{COLOR_CYAN}[1] PML4 Entry{COLOR_RESET}")
             print(f"    Address: 0x{pml4_entry_addr:016x}")
             
@@ -83,7 +101,7 @@ class WalkPageTable(gdb.Command):
                 return
             
             # Step 2: Read PDPT Entry
-            pdpt_entry_addr = pdpt_base + (pdpt_index * 8)
+            pdpt_entry_addr = g_table_vaddr(pdpt_base) + (pdpt_index * 8)
             print(f"\n{COLOR_CYAN}[2] PDPT Entry{COLOR_RESET}")
             print(f"    Address: 0x{pdpt_entry_addr:016x}")
             
@@ -115,7 +133,7 @@ class WalkPageTable(gdb.Command):
                 return
             
             # Step 3: Read PD Entry
-            pd_entry_addr = pd_base + (pd_index * 8)
+            pd_entry_addr = g_table_vaddr(pd_base) + (pd_index * 8)
             print(f"\n{COLOR_CYAN}[3] PD Entry{COLOR_RESET}")
             print(f"    Address: 0x{pd_entry_addr:016x}")
             
@@ -147,7 +165,7 @@ class WalkPageTable(gdb.Command):
                 return
             
             # Step 4: Read PT Entry
-            pt_entry_addr = pt_base + (pt_index * 8)
+            pt_entry_addr = g_table_vaddr(pt_base) + (pt_index * 8)
             print(f"\n{COLOR_CYAN}[4] PT Entry{COLOR_RESET}")
             print(f"    Address: 0x{pt_entry_addr:016x}")
             
