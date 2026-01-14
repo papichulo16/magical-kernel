@@ -12,10 +12,18 @@ right now the working features are as follows:
  - kernel slab allocator
  - input/output
  - terminal UI and command handling
+ - drivers:
+   - AHCI SATA driver
+   - PS/2 Keyboard
 
 ### goal
 
-the goal is to have working IO, separate kernel/user space, and a file system
+TO DO GOALS:
+ - FAT or EXT2 file system driver
+ - ELF driver
+ - user space, syscall trap frame
+ - dynamic linker??
+ - buddy allocator??
 
 I am pretty busy so this will be a VERY slow process, but we will see how it goes. I also have blog posts up documenting my learning progress [here](https://luisabraham.xyz/projects/1_kat_kernel.html)
 

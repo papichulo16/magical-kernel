@@ -10,4 +10,4 @@ qemu-system-x86_64 \
     -device ahci,id=ahci \
     -device ide-hd,bus=ahci.0,drive=ahci0 \
     -d guest_errors \
-    -s
+    -s \

@@ -132,10 +132,12 @@ void stop_cmd(struct ahci_port_t *port)
 			continue;
 		if (port->cmd & HBA_PxCMD_CR)
 			continue;
+
 		break;
 	}
-
 }
+
+uint8_t ctb[PAGE_SIZE * 2];
 
 struct ahci_rw_port_t* ahci_port_push(struct ahci_port_t* port) {
   struct ahci_rw_port_t* ahci_rw = mkmalloc(sizeof(struct ahci_rw_port_t));
@@ -146,16 +148,19 @@ struct ahci_rw_port_t* ahci_port_push(struct ahci_port_t* port) {
   ahci_rw->clb = clb;
   ahci_rw->fisb = fisb;
 
-  void* page = 0;
+  // i need a buddy allocator to map 2 pages lol, im lazy
+  //void* page = 0;
+  void* page = ctb;
 
   for (int i = 0; i < 32; i++) {
     int off = (i * 0x80) % PAGE_SIZE;
 
-    if (off == 0)
-      page = mk_vmmap_l1(0);
+    // i need a buddy allocator to map 2 pages lol, im lazy
+    //if (off == 0)
+      //page = mk_vmmap_l1(0);
 
     void* vaddr = page + off;
-    void* paddr = mk_g_paddr(vaddr);
+    void* paddr = _mk_g_paddr(vaddr);
 
     ahci_rw->ctb[i] = vaddr;
     
@@ -272,7 +277,7 @@ int mk_ahci_read(struct ahci_rw_port_t *port, uint64_t lba, uint32_t count, void
     cmd_header->p = 0;     // Not prefetchable
     
     // Set up PRDT entry
-    uintptr_t buffer_phys = _mk_g_paddr(buffer);
+    uintptr_t buffer_phys = mk_g_paddr(buffer);
     cmd_table->prdt_entry[0].dba = buffer_phys & 0xFFFFFFFF;
     cmd_table->prdt_entry[0].dbau = (buffer_phys >> 32) & 0xFFFFFFFF;
     cmd_table->prdt_entry[0].dbc = (count * 512) - 1;  // Byte count (0-based)
@@ -343,7 +348,7 @@ int mk_ahci_write(struct ahci_rw_port_t *port, uint64_t lba, uint32_t count, con
     cmd_header->p = 0;     // Not prefetchable
     
     // Set up PRDT entry
-    uintptr_t buffer_phys = _mk_g_paddr((void*)buffer);
+    uintptr_t buffer_phys = mk_g_paddr((void*)buffer);
     cmd_table->prdt_entry[0].dba = buffer_phys & 0xFFFFFFFF;
     cmd_table->prdt_entry[0].dbau = (buffer_phys >> 32) & 0xFFFFFFFF;
     cmd_table->prdt_entry[0].dbc = (count * 512) - 1;  // Byte count (0-based)

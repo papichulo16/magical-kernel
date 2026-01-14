@@ -33,7 +33,7 @@ struct ahci_port_t {
     uint32_t fbu;        // FIS Base Address (upper 32-bit)
     uint32_t is;         // Interrupt Status
     uint32_t ie;         // Interrupt Enable
-    uint32_t cmd;        // Command and Status
+    volatile uint32_t cmd;        // Command and Status
     uint32_t rsv0;       // Reserved
     uint32_t tfd;        // Task File Data
     uint32_t sig;        // Signature
