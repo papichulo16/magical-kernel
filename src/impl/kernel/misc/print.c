@@ -172,7 +172,7 @@ void print_menu() {
     print_str(" |_ _  |.--.) )\n");
     print_str(" ( T   )     /\n");
     print_str("(((^_(((/(((_/\n");
-    print_str("Welcome to the Kat Kernel!\n");
+    print_str("Welcome to my kernel!\n");
     print_str("Check out the blogs I have written for this in www.luisabraham.xyz! This is a fun little hobby kernel I work on in my free time.\n\n");
 
     print_set_color(PRINT_COLOR_BLACK, PRINT_COLOR_LIGHT_GREEN);

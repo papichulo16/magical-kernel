@@ -1,5 +1,5 @@
-# Kat Kernel 
-## The cat oriented kernel you wish existed sooner!!11!
+# Magical-Kernel Ultra 
+## The most magical kernel of all
 
 ### features
 
@@ -25,7 +25,7 @@ TO DO GOALS:
  - dynamic linker??
  - buddy allocator??
 
-I am pretty busy so this will be a VERY slow process, but we will see how it goes. I also have blog posts up documenting my learning progress [here](https://luisabraham.xyz/projects/1_kat_kernel.html)
+I am pretty busy so this will be a VERY slow process, but we will see how it goes. I also have blog posts up documenting my learning progress [here](https://luisabraham.xyz/projects/1_kernel.html)
 
 ### building
 
