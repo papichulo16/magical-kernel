@@ -262,6 +262,6 @@ void mk_virt_init() {
     uint64_t* cr3 = g_ptable_vaddr_l1((uint8_t *) get_cr3());
     uint64_t* l3_table = (uint64_t *) ((uint64_t) g_ptable_vaddr_l1((uint8_t *) cr3[0]) & ~0xfff);
     
-    //l3_table[0] = 0;
-    //cr3[0] = 0;
+    l3_table[0] = 0;
+    cr3[0] = 0;
 }
