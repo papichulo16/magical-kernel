@@ -28,6 +28,7 @@ void print_user_clear();
 void print_char(char character);
 void print_str(char* str);
 void print_error(char* str);
+void assert(int event, char* str);
 
 void print_nibble(uint8_t byte);
 void print_byte(uint8_t byte);

@@ -5,6 +5,8 @@
 
 #define THREAD_TIME_SLICE 3
 
+typedef void (*thread_func)();
+
 enum ThreadState {
     MK_THREAD_KILLED,
     MK_THREAD_READY,

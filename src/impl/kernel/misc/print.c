@@ -131,6 +131,14 @@ void print_error(char* str) {
     color = c;
 }
 
+void assert(int event, char* str) {
+  if (event == 0)
+    return;
+
+  print_error(str);
+  while(1);
+}
+
 void print_nibble(uint8_t byte) {
     print_char(nibbles[byte & 0xf]);
 }

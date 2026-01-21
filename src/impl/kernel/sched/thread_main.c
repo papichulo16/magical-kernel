@@ -22,6 +22,13 @@ void mk_thread_idle() {
     while(1);
 }
 
+void t_call_thread() {
+  ((thread_func) working_thread->entry)();
+
+  mk_thread_kill();
+}
+
+
 void t_init_basic(struct mk_thread_obj* t, void* entry, char* thread_name) {
     t->thread_name = thread_name;
     
@@ -32,7 +39,7 @@ void t_init_basic(struct mk_thread_obj* t, void* entry, char* thread_name) {
     t->time_slice = 0;
     
     t->regs.rsp = (uint64_t) t->stack_base + PAGE_SIZE;
-    t->regs.rip = (uint64_t) t->entry;
+    t->regs.rip = (uint64_t) &t_call_thread;
 
     // temporary
     t->regs.cs = (uint64_t) 0x8;

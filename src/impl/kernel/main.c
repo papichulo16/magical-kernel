@@ -12,6 +12,7 @@
 #include "thread.h"
 #include "drivers/ps2.h"
 #include "drivers/ahci.h"
+#include "drivers/ext2.h"
 
 #include <stdint.h>
 
@@ -32,6 +33,7 @@ void sys_init() {
   mk_virt_init();
 
   mk_ahci_init();
+  mk_ext2_init();
 }
 
 void start_keyboard() {
@@ -57,44 +59,9 @@ void idle_thread() {
   while(1);
 }
 
-void disk_rw_test() {
-  int c = 512;
-  char* wbuf = mkmalloc(c);
-  char* rbuf = mkmalloc(c);
-
-  for (int i = 0; i < c; i++) {
-    wbuf[i] = 'A';
-  }
-
-  struct ahci_rw_port_t* port = mk_g_ahci_head();
-
-  cache_flush_all();
-
-  if (!mk_ahci_write(port, 100, 1, wbuf)) {
-    print_error("write fail\n");
-
-    while(1);
-  }
-  
-  if (!mk_ahci_read(port, 100, 1, rbuf)) {
-    print_error("read fail\n");
-
-    while(1);
-  }
-
-  cache_flush_all();
-
-  print_str("buf: ");
-  print_str(rbuf);
-
-  mk_thread_kill();
-}
-
 void initialize_tasks() {
   mk_thread_create(&idle_thread, "idle_task");
   mk_thread_create(&mk_ps2_keyboard_driver, "ps2_keyboard_task");
-
-  mk_thread_create(&disk_rw_test, "disk_rw_test");
 }
 
 void kernel_main() {
